@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Created by joel on 2016-12-13.
+ * Test to see if this change will be committed
  */
 
 public class MovieAdapter extends ArrayAdapter<Movie> {
