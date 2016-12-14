@@ -22,6 +22,7 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_weight="1"
+            android:id="@+id/detail_poster"
             android:src="@mipmap/ic_launcher"/>
 
         <!--  This will contain vertically stacked informtion -->
@@ -56,6 +57,7 @@
     <!-- Adding the synopysis -->
     <TextView
         android:layout_marginTop="30dp"
+        android:id="@+id/detail_sysnopsis"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="This will be all the text that will describe the movie in detail and include the plot"/>

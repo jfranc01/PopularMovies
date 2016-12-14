@@ -1,5 +1,6 @@
 package com.example.joel.popularmovies;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -8,7 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +50,20 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.flavours_grid);
+
+        //create the listener for the gridview
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Movie movie = (Movie)parent.getItemAtPosition(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                //place the parceable in the intent
+                intent.putExtra("movie", movie);
+                //start the intent
+                startActivity(intent);
+            }
+        });
+
         return rootView;
     }
 
@@ -167,16 +184,13 @@ public class MainActivityFragment extends Fragment {
                     Uri builtUri = Uri.parse(BASE_IMAGE_URL).buildUpon()
                             .appendEncodedPath(movieObject.getString(IMAGE_URL_KEY)).build();
 
-                    URL url = new URL (builtUri.toString());
-                    movie.setmImageUrl(url);
+                    movie.setmImageUrl(builtUri.toString());
                     movieList.add(movie);
                 }
                 //return the list of movies
                 return movieList;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Error creating JSON Object: " + e.getMessage());
-            } catch (MalformedURLException e) {
-                Log.e(LOG_TAG, "Error creating URL Object: " + e.getMessage());
             }
 
             return null;

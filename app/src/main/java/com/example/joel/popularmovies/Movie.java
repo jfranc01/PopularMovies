@@ -1,5 +1,8 @@
 package com.example.joel.popularmovies;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.net.URL;
 
 /**
@@ -8,24 +11,45 @@ import java.net.URL;
  * each movie
  */
 
-public class Movie {
+public class Movie implements Parcelable{
 
     private String mTtile;
-    private URL mImageUrl;
+    private String mImageUrl;
     private String mSynopsis;
     private String mRating;
     private String mReleaseDate;
+
+
+    public Movie(){
+
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 
     public String getmTtile() {
         return mTtile;
     }
 
-    public URL getmImageUrl() {
+    public String getmImageUrl() {
         return mImageUrl;
     }
 
     public String getmSynopsis() {
         return mSynopsis;
+    }
+
+    public String getmReleaseDate(){
+        return mReleaseDate;
     }
 
     public String getmRating() {
@@ -36,7 +60,7 @@ public class Movie {
         this.mTtile = mTtile;
     }
 
-    public void setmImageUrl(URL mImageUrl) {
+    public void setmImageUrl(String mImageUrl) {
         this.mImageUrl = mImageUrl;
     }
 
@@ -50,5 +74,34 @@ public class Movie {
 
     public void setmReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
+    }
+
+    /**
+     * Read back the fields from the parcel based on the order
+     * in which they were written - title, rating, synopsis, release date, image url
+     * @param parcel
+     */
+    public Movie (Parcel parcel){
+
+        mTtile = parcel.readString();
+        mRating = parcel.readString();
+        mSynopsis = parcel.readString();
+        mReleaseDate = parcel.readString();
+        mImageUrl = parcel.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mTtile);
+        dest.writeString(mRating);
+        dest.writeString(mSynopsis);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mImageUrl);
+
     }
 }
