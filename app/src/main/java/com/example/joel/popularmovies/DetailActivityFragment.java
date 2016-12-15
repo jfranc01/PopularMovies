@@ -45,8 +45,8 @@ public class DetailActivityFragment extends Fragment {
         TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
         TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
         title.setText(movie.getmTtile());
-        rating.setText(movie.getmRating());
-        release_date.setText(movie.getmReleaseDate());
+        rating.setText(movie.getmRating()+"/10");
+        release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
         synopsis.setText(movie.getmSynopsis());
         Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
         return rootView;

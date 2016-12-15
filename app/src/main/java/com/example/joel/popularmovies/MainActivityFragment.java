@@ -36,6 +36,8 @@ public class MainActivityFragment extends Fragment {
     GridView gridView;
 
     public MainActivityFragment() {
+        //notify thar the fragment has settings options
+        setHasOptionsMenu(true);
     }
 
     @Override

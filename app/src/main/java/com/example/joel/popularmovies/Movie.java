@@ -5,6 +5,18 @@ import android.os.Parcelable;
 
 import java.net.URL;
 
+
+/***
+ * NOTE:
+ * You should be able to this from Android studio. The easiest way is going to the bottom
+ * right corner of the Android Studio window where you should see the text "Git: branch name",
+ * in your case it should say "Git: master". Click on and it will show a small menu consisting
+ * of the different branches available both locally and remotely, also there should be an option
+ * "+ New Branch" which will create a new branch for you and switch you to it. Now you should be
+ * able to change some code, commit it and push it to remote.Merging and checking out branches can
+ * also be done from that same menu. The same thing can als be done from the menubar option "VCS"
+ */
+
 /**
  * Created by joel on 2016-12-13.
  * This Movie class will hold details about
