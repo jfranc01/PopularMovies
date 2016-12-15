@@ -1,8 +1,10 @@
 package com.example.joel.popularmovies;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,14 +39,19 @@ public class MainActivityFragment extends Fragment {
 
     public MainActivityFragment() {
         //notify thar the fragment has settings options
-        setHasOptionsMenu(true);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        //Read from the shared preferences and pass the value appropriately
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //get the key and also set the default value
+        String sort_order = sharedPrefs.getString(getString(R.string.sort_order_key),
+                getString(R.string.sort_order_default));
         FetchMovieList fetchMovieList = new FetchMovieList();
-        fetchMovieList.execute();
+        //pass the value of the key to the task
+        fetchMovieList.execute(sort_order);
     }
 
     @Override
@@ -72,21 +79,31 @@ public class MainActivityFragment extends Fragment {
     /**
      * This class will retrieve the list of movies
      */
-    public class FetchMovieList extends AsyncTask<Void, String, List<Movie>>{
+    public class FetchMovieList extends AsyncTask<String, String, List<Movie>>{
 
         private final String LOG_TAG = FetchMovieList.class.getSimpleName();
 
 
         @Override
-        protected List<Movie> doInBackground(Void... params) {
+        protected List<Movie> doInBackground(String... params) {
 
             final String BASE_URL = "http://api.themoviedb.org/3/movie";
-            final String ADD_ON_SEGMENT = "popular";
+            final String ADD_ON_POPULAR_SEGMENT = "popular";
+            final String ADD_ON_RATING_SEGMENT = "top_rated";
             final String API_KEY_PARAM= "api_key";
+            String ADD_ON_SEGMENT = "";
             String jsonMovieString =  null;
             HttpURLConnection httpURLConnection =  null;
             InputStreamReader isr = null;
             BufferedReader br = null;
+
+            if(params[0].equalsIgnoreCase(getString(R.string.sort_order_choice_popularity_value))){
+                ADD_ON_SEGMENT = ADD_ON_POPULAR_SEGMENT;
+            }
+            else{
+                ADD_ON_SEGMENT = ADD_ON_RATING_SEGMENT;
+            }
+
 
             try{
 
