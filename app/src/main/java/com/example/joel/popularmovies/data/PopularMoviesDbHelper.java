@@ -21,7 +21,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // Create a table called Favourites that will hold the "favouritied" movies
         // along with their details.
-        final String CREATE_FAVORITES_TABLE = "CREATE TABLE" +
+        final String CREATE_FAVORITES_TABLE = "CREATE TABLE " +
                 PopularMoviesContract.FavouriteEntry.TABLE_NAME + " ( " +
                 PopularMoviesContract.FavouriteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " TEXT UNIQUE NOT NULL," +
