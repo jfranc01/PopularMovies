@@ -30,6 +30,7 @@ public class Movie implements Parcelable{
     private String mSynopsis;
     private String mRating;
     private String mReleaseDate;
+    private String mId;
 
 
     public Movie(){
@@ -86,6 +87,14 @@ public class Movie implements Parcelable{
 
     public void setmReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
+    }
+
+    public String getmId() {
+        return mId;
+    }
+
+    public void setmId(String mId) {
+        this.mId = mId;
     }
 
     /**
