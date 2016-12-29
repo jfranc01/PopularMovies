@@ -42,9 +42,10 @@ public class FavouritesProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
         int match = sUriMatcher.match(uri);
+        Cursor retCursor;
         switch (match){
             case FAVOURITES:
-                return dbHelpher.getReadableDatabase().query(
+                retCursor = dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -53,6 +54,7 @@ public class FavouritesProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                break;
 
             case FAVOURITES_ID :
                 //get the ID that was passed in
@@ -61,7 +63,7 @@ public class FavouritesProvider extends ContentProvider {
                 final String favWithIDSelection = PopularMoviesContract.FavouriteEntry.TABLE_NAME +
                         "." + PopularMoviesContract.FavouriteEntry._ID + " = ? ";
                 //return the cursor
-                return dbHelpher.getReadableDatabase().query(
+                retCursor =  dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,
                         projection,
                         favWithIDSelection,
@@ -70,9 +72,12 @@ public class FavouritesProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+            break;
 
             default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
+        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return retCursor;
 
     }
 
@@ -102,29 +107,50 @@ public class FavouritesProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        int match = sUriMatcher.match(uri);
+        Uri returnUri;
+        switch (match){
+            case FAVOURITES : {
+                long _id = dbHelpher.getWritableDatabase().insert(
+                        PopularMoviesContract.FavouriteEntry.TABLE_NAME,
+                        null,
+                        values
+                        );
+                if(_id>0){
+                    returnUri = PopularMoviesContract.FavouriteEntry.buildPopularMoviesUri(_id);
+                }
+                else{
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown Uri: " + uri);
+        }
+        //nofity the resolver of the change
+        getContext().getContentResolver().notifyChange(uri, null);
+        return returnUri;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 
-        //where clause
-       final String whereClause = PopularMoviesContract.FavouriteEntry.TABLE_NAME +
-                "." + PopularMoviesContract.FavouriteEntry._ID + " = ? ";
-        //extract the id
-        String id = String.valueOf(ContentUris.parseId(uri));
-
         int match = sUriMatcher.match(uri);
+        int rowsDeleted;
 
         switch(match){
-            case FAVOURITES_ID:{
-                return dbHelpher.getWritableDatabase().delete(PopularMoviesContract.FavouriteEntry.TABLE_NAME,
-                       whereClause, new String[]{id});
+            case FAVOURITES:{
+                rowsDeleted =  dbHelpher.getWritableDatabase().delete(PopularMoviesContract.FavouriteEntry.TABLE_NAME,
+                        selection, selectionArgs);
+                break;
             }
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
-
+        if(rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 
     @Override
