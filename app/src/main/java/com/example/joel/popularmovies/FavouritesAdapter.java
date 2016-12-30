@@ -13,6 +13,9 @@ import com.squareup.picasso.Picasso;
 
 /**
  * Created by joel on 2016-12-29.
+ * This adapter is not used currently as a list can only be bound to one
+ * adapter at a time. We don't use the cursor loader here, we use an AsyncTaskLoader
+ * so that we can bind an arraylist to the original adapter
  */
 
 public class FavouritesAdapter extends CursorAdapter {

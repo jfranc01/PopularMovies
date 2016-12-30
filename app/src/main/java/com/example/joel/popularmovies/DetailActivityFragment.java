@@ -57,7 +57,6 @@ public class DetailActivityFragment extends Fragment {
         synopsis.setText(movie.getmSynopsis());
         Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
 
-
         //get a reference to the star button
         ImageButton startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
         //set on onlicklistener
@@ -69,7 +68,7 @@ public class DetailActivityFragment extends Fragment {
                  Uri returnUri = getContext().getContentResolver().insert
                         (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(movie));
                 if(returnUri != null){
-                    Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT);
+                    Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
                 }
             }
         });
