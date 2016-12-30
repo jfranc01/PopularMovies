@@ -49,6 +49,7 @@ public class MainActivityFragment extends Fragment
     public final String LOG_TAG = getClass().getSimpleName();
     private static final int FAVOURTIES_LOADER = 1;
     private FavouritesAdapter mFavouritesAdapter;
+    private String mCurrentSortOrder;
 
 
     public MainActivityFragment() {
@@ -82,17 +83,27 @@ public class MainActivityFragment extends Fragment
         //set the preference change listener
         sharedPrefs.registerOnSharedPreferenceChangeListener(this);
         //get the key and also set the default value
-        String sort_order = sharedPrefs.getString(getString(R.string.sort_order_key),
+        mCurrentSortOrder = sharedPrefs.getString(getString(R.string.sort_order_key),
                 getString(R.string.sort_order_default));
 
-        if(sort_order.equalsIgnoreCase("Favourites")){
+        if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
             //here we use a AsyncTaskLoader to load items form the database
             getLoaderManager().initLoader(FAVOURTIES_LOADER,null, this);
         }
         else{
             FetchMovieList fetchMovieList = new FetchMovieList();
             //pass the value of the key to the task
-            fetchMovieList.execute(sort_order);
+            fetchMovieList.execute(mCurrentSortOrder);
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
+            getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
+            gridView.setAdapter(mFavouritesAdapter);
         }
 
     }
@@ -150,11 +161,8 @@ public class MainActivityFragment extends Fragment
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Log.i(LOG_TAG, "Settings key changed: " + key);
-        String current_cort_order = sharedPreferences.getString(key, "Popularity");
-        Log.i(LOG_TAG, "Current Sort Order: " + current_cort_order);
-        if(current_cort_order.equalsIgnoreCase("Favourites")){
-            getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
-        }
+        mCurrentSortOrder = sharedPreferences.getString(key, "Popularity");
+        Log.i(LOG_TAG, "Current Sort Order: " + mCurrentSortOrder);
     }
 
     /**
