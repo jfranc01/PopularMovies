@@ -1,12 +1,19 @@
 package com.example.joel.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
+
+import com.example.joel.popularmovies.data.PopularMoviesContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,25 +42,59 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener{
 
     GridView gridView;
+    public final String LOG_TAG = getClass().getSimpleName();
+    private static final int FAVOURTIES_LOADER = 1;
+    private FavouritesAdapter mFavouritesAdapter;
+
 
     public MainActivityFragment() {
         //notify thar the fragment has settings options
     }
 
+    //projection columns
+    private static final String[] FAVOURITE_COLUMNS = {
+            PopularMoviesContract.FavouriteEntry._ID,
+            PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE,
+            PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS,
+            PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE,
+            PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RATING,
+            PopularMoviesContract.FavouriteEntry.COLUMN_NAME_IMGURL
+    };
+
+    static final int COL_FAV_ID = 0;
+    static final int COL_FAV_TITLE = 1;
+    static final int COL_FAV_SYNOPSIS = 2;
+    static final int COL_FAV_RELEASE = 3;
+    static final int COL_FAV_RATING = 4;
+    static final int COL_FAV_IMGURL = 5;
+
     @Override
     public void onStart() {
         super.onStart();
         //Read from the shared preferences and pass the value appropriately
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getActivity());
+
+        //set the preference change listener
+        sharedPrefs.registerOnSharedPreferenceChangeListener(this);
         //get the key and also set the default value
         String sort_order = sharedPrefs.getString(getString(R.string.sort_order_key),
                 getString(R.string.sort_order_default));
-        FetchMovieList fetchMovieList = new FetchMovieList();
-        //pass the value of the key to the task
-        fetchMovieList.execute(sort_order);
+
+        if(sort_order.equalsIgnoreCase("Favourites")){
+            //here we use a AsyncTaskLoader to load items form the database
+            getLoaderManager().initLoader(FAVOURTIES_LOADER,null, this);
+        }
+        else{
+            FetchMovieList fetchMovieList = new FetchMovieList();
+            //pass the value of the key to the task
+            fetchMovieList.execute(sort_order);
+        }
+
     }
 
     @Override
@@ -59,6 +102,9 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         gridView = (GridView) rootView.findViewById(R.id.flavours_grid);
+
+        mFavouritesAdapter = new FavouritesAdapter(getActivity(), null, 0);
+        gridView.setAdapter(mFavouritesAdapter);
 
         //create the listener for the gridview
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -74,6 +120,41 @@ public class MainActivityFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        //we query the content provider
+        //here we don't care about projects or the sort order
+        //simply query and retrieve all records from the database
+        return new CursorLoader(
+                getActivity(),
+                PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                FAVOURITE_COLUMNS,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mFavouritesAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mFavouritesAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.i(LOG_TAG, "Settings key changed: " + key);
+        String current_cort_order = sharedPreferences.getString(key, "Popularity");
+        Log.i(LOG_TAG, "Current Sort Order: " + current_cort_order);
+        if(current_cort_order.equalsIgnoreCase("Favourites")){
+            getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
+        }
     }
 
     /**

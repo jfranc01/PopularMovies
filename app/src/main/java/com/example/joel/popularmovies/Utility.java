@@ -1,6 +1,9 @@
 package com.example.joel.popularmovies;
 
+import android.content.ContentValues;
 import android.util.Log;
+
+import com.example.joel.popularmovies.data.PopularMoviesContract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,5 +36,22 @@ public class Utility {
             Log.e(LOG_TAG, "Error parsing the date " + e.getMessage() );
         }
         return null;
+    }
+
+    /**
+     * This method will create a ContentValues object
+     * based on the Movie object that is passed in to the
+     * database
+     * @param movie
+     * @return
+     */
+    public static ContentValues createContentValues(Movie movie){
+        ContentValues cv  = new ContentValues();
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE, movie.getmTtile());
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS, movie.getmSynopsis());
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE, movie.getmReleaseDate());
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_IMGURL, movie.getmImageUrl());
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RATING, movie.getmRating());
+        return cv;
     }
 }

@@ -59,9 +59,10 @@
 
             <ImageButton
                 android:layout_marginLeft="10dp"
+                android:id="@+id/starButtton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/btn_star_big_on"/>
+                android:src="@android:drawable/btn_star_big_off" />
 
         </LinearLayout>
 

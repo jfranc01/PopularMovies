@@ -1,15 +1,20 @@
 package com.example.joel.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.joel.popularmovies.data.PopularMoviesContract;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -18,6 +23,9 @@ import com.squareup.picasso.Picasso;
 public class DetailActivityFragment extends Fragment {
 
     Intent intent;
+    public final String LOG_TAG = this.getClass().getSimpleName();
+    public final String FAV_ADDED = "Movie saved as favourite!";
+    Movie movie =  null;
 
     public DetailActivityFragment() {
     }
@@ -31,7 +39,6 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Movie movie =  null;
         if(intent != null){
             if(intent.hasExtra("movie")){
                 movie = intent.getParcelableExtra("movie");
@@ -49,6 +56,24 @@ public class DetailActivityFragment extends Fragment {
         release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
         synopsis.setText(movie.getmSynopsis());
         Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
+
+
+        //get a reference to the star button
+        ImageButton startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
+        //set on onlicklistener
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Star button was pressed");
+                //here we get access to the content resolver and perform an insert into the database
+                 Uri returnUri = getContext().getContentResolver().insert
+                        (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(movie));
+                if(returnUri != null){
+                    Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT);
+                }
+            }
+        });
+
         return rootView;
     }
 }

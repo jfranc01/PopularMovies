@@ -3,9 +3,11 @@
     <array name="sort_order_choices">
         <item>@string/sort_order_choice_popularity</item>
         <item>@string/sort_order_choice_rating</item>
+        <item>@string/sort_order_choice_favourites</item>
     </array>
     <array name="sort_order_values">
         <item>@string/sort_order_choice_popularity_value</item>
         <item>@string/sort_order_choice_rating_value</item>
+        <item>@string/sort_order_choice_favourites_value</item>
     </array>
 </resources>
