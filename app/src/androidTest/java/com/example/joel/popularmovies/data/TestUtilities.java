@@ -32,7 +32,7 @@ public class TestUtilities extends AndroidTestCase {
                 "My brother and I will order a pizza. What happens next is a thriller!" +
                 " There will also be desert. Hopefully cheesecake. thi story is about two boys, their, pizza" +
                         "and desert");
-        favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE, " Pizza Night!");
+        favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE, "Pizza Night!");
         return favouritesValues;
     }
 

@@ -62,7 +62,8 @@
                 android:id="@+id/starButtton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/btn_star_big_off" />
+                android:src="@drawable/off__star"
+                android:background="@android:color/white" />
 
         </LinearLayout>
 

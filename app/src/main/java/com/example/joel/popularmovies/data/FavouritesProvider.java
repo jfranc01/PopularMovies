@@ -18,6 +18,7 @@ public class FavouritesProvider extends ContentProvider {
      */
     public static final int FAVOURITES = 100; // to get all favourites
     public static final int FAVOURITES_ID = 101; // to view a favourite or delete a faovurite
+    public static final int FAVOURITES_TITLE = 102; //query for a movie with the title
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private PopularMoviesDbHelper dbHelpher;
@@ -27,6 +28,8 @@ public class FavouritesProvider extends ContentProvider {
         final String authority = PopularMoviesContract.CONTENT_AUTHORITY.toString();
         matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES, 100 );
         matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/#" , 101);
+        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/*" , 102);
+
 
         return matcher;
     }
@@ -39,7 +42,8 @@ public class FavouritesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection,
+                        String selection, String[] selectionArgs, String sortOrder) {
 
         int match = sUriMatcher.match(uri);
         Cursor retCursor;
@@ -56,7 +60,7 @@ public class FavouritesProvider extends ContentProvider {
                 );
                 break;
 
-            case FAVOURITES_ID :
+            case FAVOURITES_ID:
                 //get the ID that was passed in
                 String id = String.valueOf(ContentUris.parseId(uri));
                 //create the selection statement
@@ -74,6 +78,18 @@ public class FavouritesProvider extends ContentProvider {
                 );
             break;
 
+            case FAVOURITES_TITLE:
+                retCursor = dbHelpher.getReadableDatabase()
+                        .query(
+                                PopularMoviesContract.FavouriteEntry.TABLE_NAME,
+                                projection,
+                                selection,
+                                selectionArgs,
+                                null,
+                                null,
+                                sortOrder
+                        );
+                break;
             default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -97,6 +113,10 @@ public class FavouritesProvider extends ContentProvider {
 
             case FAVOURITES_ID: {
                 return  PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
+            }
+
+            case FAVOURITES_TITLE: {
+                return PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
             }
 
             default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
@@ -140,7 +160,8 @@ public class FavouritesProvider extends ContentProvider {
 
         switch(match){
             case FAVOURITES:{
-                rowsDeleted =  dbHelpher.getWritableDatabase().delete(PopularMoviesContract.FavouriteEntry.TABLE_NAME,
+                rowsDeleted =  dbHelpher.getWritableDatabase()
+                        .delete(PopularMoviesContract.FavouriteEntry.TABLE_NAME,
                         selection, selectionArgs);
                 break;
             }

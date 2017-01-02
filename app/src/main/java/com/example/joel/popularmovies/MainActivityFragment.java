@@ -59,7 +59,7 @@ public class MainActivityFragment extends Fragment
     }
 
     //projection columns
-    private static final String[] FAVOURITE_COLUMNS = {
+    public static final String[] FAVOURITE_COLUMNS = {
             PopularMoviesContract.FavouriteEntry._ID,
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE,
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS,
@@ -169,6 +169,7 @@ public class MainActivityFragment extends Fragment
                 movie.setmReleaseDate(data.getString(COL_FAV_RELEASE)); //release
                 movie.setmRating(data.getString(COL_FAV_RATING)); //rating
                 movie.setmImageUrl(data.getString(COL_FAV_IMGURL)); //img url
+                movie.setmIsFav(true); //is it a favourite
                 favList.add(movie);
             }while(data.moveToNext());
         }

@@ -31,7 +31,7 @@ public class Movie implements Parcelable{
     private String mRating;
     private String mReleaseDate;
     private String mId;
-
+    private boolean mIsFav = false;
 
     public Movie(){
 
@@ -97,6 +97,14 @@ public class Movie implements Parcelable{
         this.mId = mId;
     }
 
+    public boolean ismIsFav() {
+        return mIsFav;
+    }
+
+    public void setmIsFav(boolean mIsFav) {
+        this.mIsFav = mIsFav;
+    }
+
     /**
      * Read back the fields from the parcel based on the order
      * in which they were written - title, rating, synopsis, release date, image url
@@ -109,6 +117,7 @@ public class Movie implements Parcelable{
         mSynopsis = parcel.readString();
         mReleaseDate = parcel.readString();
         mImageUrl = parcel.readString();
+        mIsFav = parcel.readByte() != 0;
     }
 
     @Override
@@ -123,6 +132,6 @@ public class Movie implements Parcelable{
         dest.writeString(mSynopsis);
         dest.writeString(mReleaseDate);
         dest.writeString(mImageUrl);
-
+        dest.writeByte((byte)(mIsFav? 1: 0));
     }
 }

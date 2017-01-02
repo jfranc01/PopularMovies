@@ -96,6 +96,24 @@ public class TestProvider extends AndroidTestCase {
             assertEquals("Error: Favourites Query did not properly set NotificationUri",
                     favCursor.getNotificationUri(), PopularMoviesContract.FavouriteEntry.CONTENT_URI);
         }
+
+        final String TITLE = "Pizza Night!";
+        Cursor titleCursor = mContext.getContentResolver()
+                .query(PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                null,
+                PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ?",
+                new String[]{TITLE},
+                null
+        );
+
+        // Make sure we get the correct cursor out of the database
+        TestUtilities.validateCursor("testFavouriteQueries", titleCursor, values);
+        if ( Build.VERSION.SDK_INT >= 19 ) {
+            assertEquals("Error: Favourites Query did not properly set NotificationUri",
+                    titleCursor.getNotificationUri(), PopularMoviesContract.FavouriteEntry.CONTENT_URI);
+        }
+        //Test the query by title
+
     }
 
     public void testDeleteFavourite(){
