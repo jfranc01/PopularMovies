@@ -117,6 +117,7 @@ public class Movie implements Parcelable{
         mSynopsis = parcel.readString();
         mReleaseDate = parcel.readString();
         mImageUrl = parcel.readString();
+        mId = parcel.readString();
         mIsFav = parcel.readByte() != 0;
     }
 
@@ -132,6 +133,7 @@ public class Movie implements Parcelable{
         dest.writeString(mSynopsis);
         dest.writeString(mReleaseDate);
         dest.writeString(mImageUrl);
+        dest.writeString(mId);
         dest.writeByte((byte)(mIsFav? 1: 0));
     }
 }

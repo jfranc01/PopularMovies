@@ -202,10 +202,6 @@ public class MainActivityFragment extends Fragment
         @Override
         protected List<Movie> doInBackground(String... params) {
 
-            final String BASE_URL = "http://api.themoviedb.org/3/movie";
-            final String ADD_ON_POPULAR_SEGMENT = "popular";
-            final String ADD_ON_RATING_SEGMENT = "top_rated";
-            final String API_KEY_PARAM= "api_key";
             String ADD_ON_SEGMENT = "";
             String jsonMovieString =  null;
             HttpURLConnection httpURLConnection =  null;
@@ -213,18 +209,18 @@ public class MainActivityFragment extends Fragment
             BufferedReader br = null;
 
             if(params[0].equalsIgnoreCase(getString(R.string.sort_order_choice_popularity_value))){
-                ADD_ON_SEGMENT = ADD_ON_POPULAR_SEGMENT;
+                ADD_ON_SEGMENT = Constants.ADD_ON_POPULAR_SEGMENT;
             }
             else{
-                ADD_ON_SEGMENT = ADD_ON_RATING_SEGMENT;
+                ADD_ON_SEGMENT = Constants.ADD_ON_RATING_SEGMENT;
             }
 
 
             try{
 
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                Uri builtUri = Uri.parse(Constants.BASE_URL).buildUpon()
                         .appendEncodedPath(ADD_ON_SEGMENT)
-                        .appendQueryParameter(API_KEY_PARAM,
+                        .appendQueryParameter(Constants.API_KEY_PARAM,
                                 BuildConfig.OPEN_MOVIE_DB_API_KEY)
                         .build();
 
@@ -294,13 +290,6 @@ public class MainActivityFragment extends Fragment
          */
         private List<Movie> getMovieDataFromJsonString(String jsonMovieString) {
 
-            final String TITLE_KEY = "original_title";
-            final String SYNOPSIS_KEY= "overview";
-            final String RELEASE_DATE_KEY = "release_date";
-            final String RATING_KEY = "vote_average";
-            final String IMAGE_URL_KEY = "poster_path";
-            final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
-
             final ArrayList<Movie>  movieList = new ArrayList<>();
 
             try {
@@ -311,14 +300,15 @@ public class MainActivityFragment extends Fragment
 
                     JSONObject movieObject = jsonArray.getJSONObject(i);
                     Movie movie = new Movie();
-                    movie.setmTtile(movieObject.getString(TITLE_KEY));
-                    movie.setmRating(movieObject.getString(RATING_KEY));
-                    movie.setmSynopsis(movieObject.getString(SYNOPSIS_KEY));
-                    movie.setmReleaseDate(movieObject.getString(RELEASE_DATE_KEY));
-                    Uri builtUri = Uri.parse(BASE_IMAGE_URL).buildUpon()
-                            .appendEncodedPath(movieObject.getString(IMAGE_URL_KEY)).build();
+                    movie.setmTtile(movieObject.getString(Constants.TITLE_KEY));
+                    movie.setmRating(movieObject.getString(Constants.RATING_KEY));
+                    movie.setmSynopsis(movieObject.getString(Constants.SYNOPSIS_KEY));
+                    movie.setmReleaseDate(movieObject.getString(Constants.RELEASE_DATE_KEY));
+                    Uri builtUri = Uri.parse(Constants.BASE_IMAGE_URL).buildUpon()
+                            .appendEncodedPath(movieObject.getString(Constants.IMAGE_URL_KEY)).build();
 
                     movie.setmImageUrl(builtUri.toString());
+                    movie.setmId(movieObject.getString(Constants.ID));
                     movieList.add(movie);
                 }
                 //return the list of movies
