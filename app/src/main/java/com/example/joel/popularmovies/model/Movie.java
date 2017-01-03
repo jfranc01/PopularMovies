@@ -1,9 +1,7 @@
-package com.example.joel.popularmovies;
+package com.example.joel.popularmovies.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.net.URL;
 
 
 /***

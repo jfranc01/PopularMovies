@@ -1,17 +1,14 @@
 package com.example.joel.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -20,9 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
+import com.example.joel.popularmovies.adapters.FavouritesAdapter;
+import com.example.joel.popularmovies.adapters.MovieAdapter;
 import com.example.joel.popularmovies.data.PopularMoviesContract;
+import com.example.joel.popularmovies.model.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,11 +29,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,12 +65,12 @@ public class MainActivityFragment extends Fragment
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_IMGURL
     };
 
-    static final int COL_FAV_ID = 0;
-    static final int COL_FAV_TITLE = 1;
-    static final int COL_FAV_SYNOPSIS = 2;
-    static final int COL_FAV_RELEASE = 3;
-    static final int COL_FAV_RATING = 4;
-    static final int COL_FAV_IMGURL = 5;
+    public static final int COL_FAV_ID = 0;
+    public static final int COL_FAV_TITLE = 1;
+    public static final int COL_FAV_SYNOPSIS = 2;
+    public static final int COL_FAV_RELEASE = 3;
+    public static final int COL_FAV_RATING = 4;
+    public static final int COL_FAV_IMGURL = 5;
 
     @Override
     public void onStart() {

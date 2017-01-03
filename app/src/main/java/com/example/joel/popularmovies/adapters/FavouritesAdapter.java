@@ -1,4 +1,4 @@
-package com.example.joel.popularmovies;
+package com.example.joel.popularmovies.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.joel.popularmovies.MainActivityFragment;
+import com.example.joel.popularmovies.R;
 import com.squareup.picasso.Picasso;
 
 /**

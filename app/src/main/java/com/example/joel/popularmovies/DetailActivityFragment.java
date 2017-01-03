@@ -13,10 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.joel.popularmovies.adapters.TrailerAdapter;
 import com.example.joel.popularmovies.data.PopularMoviesContract;
+import com.example.joel.popularmovies.model.Movie;
+import com.example.joel.popularmovies.model.Trailer;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -25,7 +29,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -43,6 +46,7 @@ public class DetailActivityFragment extends Fragment {
     public final String FAV_ADDED = "Movie saved as favourite!!!!!";
     public final String ALREADY_A_FAV = "Already a favourite!!";
     Movie movie =  null;
+    ListView mTrailerListView = null;
 
     public DetailActivityFragment() {
     }
@@ -71,6 +75,7 @@ public class DetailActivityFragment extends Fragment {
         TextView release_date = (TextView)rootView.findViewById(R.id.detail_release_date);
         TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
         TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
+        mTrailerListView = (ListView)rootView.findViewById(R.id.traier_list);
         title.setText(movie.getmTtile());
         rating.setText(movie.getmRating() + "/10");
         release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
@@ -168,6 +173,7 @@ public class DetailActivityFragment extends Fragment {
                 Log.i(LOG_TAG, "JSON Trailer String: " +  jsonTrailerString);
                 //here we need to parse the json object and fetch the data
                 //that we need
+                return getTrailerDataFromJsonString(jsonTrailerString);
 
             } catch (MalformedURLException e) {
                 Log.i(LOG_TAG, "Error: Malformed URI ");
@@ -210,6 +216,12 @@ public class DetailActivityFragment extends Fragment {
                 Log.e(LOG_TAG, "Error creating JSON Object: " + e.getMessage());
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<Trailer> trailers) {
+            TrailerAdapter adapter = new TrailerAdapter(getActivity(), trailers);
+            mTrailerListView.setAdapter(adapter);
         }
     }
 }

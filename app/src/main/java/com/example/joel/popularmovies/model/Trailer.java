@@ -1,4 +1,4 @@
-package com.example.joel.popularmovies;
+package com.example.joel.popularmovies.model;
 
 /**
  * Created by joel on 2017-01-02.

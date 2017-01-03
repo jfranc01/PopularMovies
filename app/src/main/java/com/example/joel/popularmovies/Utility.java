@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.util.Log;
 
 import com.example.joel.popularmovies.data.PopularMoviesContract;
+import com.example.joel.popularmovies.model.Movie;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
