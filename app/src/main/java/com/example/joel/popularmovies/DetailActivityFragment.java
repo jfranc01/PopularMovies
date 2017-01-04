@@ -7,8 +7,13 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +45,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -55,8 +59,13 @@ public class DetailActivityFragment extends Fragment {
     ListView mTrailerListView = null;
     LinearLayout mReviewLayout = null;
     LayoutInflater mInflator;
+    private ShareActionProvider mShareActionProvider;
+    private TrailerAdapter mTrailerAdapter;
+    public final String POPULAR_MOVIES_SHARE_TAG = "#Check out the movie link below: ";
+    Trailer mFirstTrailer;
 
     public DetailActivityFragment() {
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -64,6 +73,47 @@ public class DetailActivityFragment extends Fragment {
         intent = getActivity().getIntent();
         mInflator = getLayoutInflater(savedInstanceState);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_menu, menu);
+        //Retrieve the menu item
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        //get the action Provider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        if(mTrailerAdapter != null){
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/html");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, POPULAR_MOVIES_SHARE_TAG + getFirstTrailerLink());
+        return shareIntent;
+    }
+
+    private String getFirstTrailerLink(){
+
+        if(mTrailerAdapter!= null && mFirstTrailer  !=  null){
+            Uri link = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
+                    .appendQueryParameter(Constants.YOUTUBE_PARAM_V,
+                            mFirstTrailer.getmKey()).build();
+
+            URL url = null;
+            try {
+                url = new URL(link.toString());
+                return url.toString();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.i(LOG_TAG, "Error getting share link for video: ");
+                return null;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -270,8 +320,9 @@ public class DetailActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Trailer> trailers) {
             if(trailers != null && trailers.size()>0) {
-                TrailerAdapter adapter = new TrailerAdapter(getActivity(), trailers);
-                mTrailerListView.setAdapter(adapter);
+                mFirstTrailer = trailers.get(0);
+                mTrailerAdapter = new TrailerAdapter(getActivity(), trailers);
+                mTrailerListView.setAdapter(mTrailerAdapter);
                 setListViewHeightBasedOnChildren(mTrailerListView);
                 mTrailerListView.setOnTouchListener(new View.OnTouchListener() {
                     // Setting on Touch Listener for handling the touch inside ScrollView

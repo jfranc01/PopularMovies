@@ -14,4 +14,5 @@
     <string name="sort_order_key">sort_order</string>
     <string name="trailer_title">Trailers</string>
     <string name="review_title">Reviews</string>
+    <string name="action_share">Share</string>
 </resources>
