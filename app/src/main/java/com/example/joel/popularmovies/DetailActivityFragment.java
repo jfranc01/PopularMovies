@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.joel.popularmovies.adapters.TrailerAdapter;
 import com.example.joel.popularmovies.data.PopularMoviesContract;
 import com.example.joel.popularmovies.model.Movie;
+import com.example.joel.popularmovies.model.Review;
 import com.example.joel.popularmovies.model.Trailer;
 import com.squareup.picasso.Picasso;
 
@@ -273,6 +274,96 @@ public class DetailActivityFragment extends Fragment {
                     }
                 });
             }
+        }
+    }
+
+    public class FetchReviewsTask extends AsyncTask<String, Void, List<Review>>{
+
+       final String LOG_TAG = getClass().getSimpleName();
+
+
+        @Override
+        protected List<Review> doInBackground(String... params) {
+
+            HttpURLConnection httpURLConnection = null;
+            BufferedReader br = null;
+            InputStreamReader isr = null;
+            String movieID = params[0];
+
+            try{
+                Uri builtUri = Uri.parse(Constants.BASE_URL)
+                        .buildUpon().appendEncodedPath(movieID)
+                        .appendEncodedPath(Constants.ADD_ON_REVIEWS_SEGMENT)
+                        .appendQueryParameter(Constants.API_KEY_PARAM,
+                                BuildConfig.OPEN_MOVIE_DB_API_KEY).build();
+
+                Log.i(LOG_TAG, "Built Uri: " + builtUri.toString());
+
+                URL url = new URL(builtUri.toString());
+                httpURLConnection = (HttpURLConnection)url.openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.connect();
+                isr = new InputStreamReader(httpURLConnection.getInputStream());
+                if(isr == null){
+                    return null;
+                }
+                br = new BufferedReader(isr);
+                String line;
+                StringBuffer buffer = new StringBuffer();
+                while((line = br.readLine()) != null){
+                    buffer.append(line + "\n");
+                }
+
+                if(buffer.length() == 0){
+                    return null;
+                }
+
+                String jsonReviewString = buffer.toString();
+                Log.i(LOG_TAG, "Json review string: " + jsonReviewString);
+                return getReviewsFromJsonString(jsonReviewString);
+
+            } catch (MalformedURLException e) {
+                Log.i(LOG_TAG, "Error creating url: " + e.getMessage());
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.i(LOG_TAG, "Error can't open connection: " + e.getMessage());
+                e.printStackTrace();
+            }finally{
+                if (httpURLConnection != null){
+                    httpURLConnection.disconnect();
+                }
+                if(br != null){
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public List<Review> getReviewsFromJsonString(String jsonString){
+            final List<Review> reviewList = new ArrayList<>();
+            try{
+                JSONObject jsonObject = new JSONObject(jsonString);
+                JSONArray jsonArray = jsonObject.getJSONArray("results");
+                for(int i = 0; i<jsonArray.length(); i++){
+                    JSONObject reviewObj = jsonArray.getJSONObject(i);
+                    Review review = new Review();
+                    review.setId(reviewObj.getString(Constants.REVIEW_ID_KEY));
+                    review.setAuthor(reviewObj.getString(Constants.REVIEW_AUTHOR_KEY));
+                    review.setContent(reviewObj.getString(Constants.REVIEW_CONTENT_KEY));
+                    review.setUrl(reviewObj.getString(Constants.REVIEW_URL_KEY));
+                    reviewList.add(review);
+                }
+                return reviewList;
+            } catch (JSONException e) {
+                Log.i(LOG_TAG, "Error can't open create JSON object " + e.getMessage());
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }
