@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -78,6 +79,19 @@ public class DetailActivityFragment extends Fragment {
         TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
         TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
         mTrailerListView = (ListView)rootView.findViewById(R.id.traier_list);
+        mTrailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i(LOG_TAG, "Item at position " + String.valueOf(position) + " clicked");
+                //here we need to create an implicit intent
+                Trailer trailer = (Trailer) parent.getItemAtPosition(position);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri youtubeUri = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
+                        .appendQueryParameter(Constants.YOUTUBE_PARAM_V, trailer.getmKey()).build();
+                intent.setData(youtubeUri);
+                startActivity(intent);
+            }
+        });
         title.setText(movie.getmTtile());
         rating.setText(movie.getmRating() + "/10");
         release_date.setText(Utility.formatDate(movie.getmReleaseDate()));

@@ -24,5 +24,7 @@ public class Constants {
     final static String TRAILER_KEY = "key";
     final static String TRAILER_NAME_KEY = "name";
     final static String TRAILER_SITE_KEY = "site";
+    final static String YOUTBE_BASE_URI = "http://www.youtube.com/watch?v";
+    final static String YOUTUBE_PARAM_V = "v";
 
 }
