@@ -90,7 +90,7 @@ public class DetailActivityFragment extends Fragment {
     private Intent createShareForecastIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        shareIntent.setType("text/html");
+        shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_TEXT, POPULAR_MOVIES_SHARE_TAG + getFirstTrailerLink());
         return shareIntent;
     }
