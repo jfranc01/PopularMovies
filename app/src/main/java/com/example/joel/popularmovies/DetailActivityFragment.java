@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,6 +40,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -51,6 +53,8 @@ public class DetailActivityFragment extends Fragment {
     public final String ALREADY_A_FAV = "Already a favourite!!";
     Movie movie =  null;
     ListView mTrailerListView = null;
+    LinearLayout mReviewLayout = null;
+    LayoutInflater mInflator;
 
     public DetailActivityFragment() {
     }
@@ -58,6 +62,7 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         intent = getActivity().getIntent();
+        mInflator = getLayoutInflater(savedInstanceState);
         super.onCreate(savedInstanceState);
     }
 
@@ -70,6 +75,9 @@ public class DetailActivityFragment extends Fragment {
                 //here we create the task to fetch the trailers
                 FetchTrailers fetchTrailers = new FetchTrailers();
                 fetchTrailers.execute(movie.getmMovieID());
+                //here we fetch the reviews
+                FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
+                fetchReviewsTask.execute(movie.getmMovieID());
             }
         }
 
@@ -93,6 +101,7 @@ public class DetailActivityFragment extends Fragment {
                 startActivity(intent);
             }
         });
+        mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
         title.setText(movie.getmTtile());
         rating.setText(movie.getmRating() + "/10");
         release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
@@ -364,6 +373,19 @@ public class DetailActivityFragment extends Fragment {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<Review> reviews) {
+            if(reviews != null && reviews.size()>0){
+                TextView contentView;
+                for(int i=0; i<reviews.size();i++){
+                    View review_item = mInflator.inflate(R.layout.review_item,null);
+                    contentView =  (TextView)review_item.findViewById(R.id.review_content);
+                    contentView.setText(reviews.get(i).getContent());
+                    mReviewLayout.addView(review_item);
+                }
+            }
         }
     }
 }
