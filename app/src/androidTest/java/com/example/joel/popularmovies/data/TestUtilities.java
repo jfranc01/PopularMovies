@@ -26,6 +26,7 @@ public class TestUtilities extends AndroidTestCase {
                         "ja&uact=8&ved=0ahUKEwjB_IHxpJjRAhUG44MKHfhRAS8QjRwIBw&url=http%3A%" +
                         "2F%2Fen.tintin.com%2Fpersonnages%2Fshow%2Fid%2F15%2Fpage%2F0%2F0%2Ftintin&bvm" +
                         "=bv.142059868,d.amc&psig=AFQjCNFnP40gRld-BWQqyDEKnsHgvHrqDg&ust=1483062605949650");
+        favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID, "11345");
         favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RATING, "8.1");
         favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE, "2016");
         favouritesValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS,

@@ -28,7 +28,8 @@ public class Movie implements Parcelable{
     private String mSynopsis;
     private String mRating;
     private String mReleaseDate;
-    private String mId;
+    //private String mId;
+    private String mMovieID;
     private boolean mIsFav = false;
 
     public Movie(){
@@ -87,13 +88,13 @@ public class Movie implements Parcelable{
         this.mReleaseDate = mReleaseDate;
     }
 
-    public String getmId() {
-        return mId;
-    }
-
-    public void setmId(String mId) {
-        this.mId = mId;
-    }
+//    public String getmId() {
+//        return mId;
+//    }
+//
+//    public void setmId(String mId) {
+//        this.mId = mId;
+//    }
 
     public boolean ismIsFav() {
         return mIsFav;
@@ -101,6 +102,14 @@ public class Movie implements Parcelable{
 
     public void setmIsFav(boolean mIsFav) {
         this.mIsFav = mIsFav;
+    }
+
+    public String getmMovieID() {
+        return mMovieID;
+    }
+
+    public void setmMovieID(String mMovieID) {
+        this.mMovieID = mMovieID;
     }
 
     /**
@@ -115,7 +124,8 @@ public class Movie implements Parcelable{
         mSynopsis = parcel.readString();
         mReleaseDate = parcel.readString();
         mImageUrl = parcel.readString();
-        mId = parcel.readString();
+        //mId = parcel.readString();
+        mMovieID = parcel.readString();
         mIsFav = parcel.readByte() != 0;
     }
 
@@ -131,7 +141,8 @@ public class Movie implements Parcelable{
         dest.writeString(mSynopsis);
         dest.writeString(mReleaseDate);
         dest.writeString(mImageUrl);
-        dest.writeString(mId);
+        //dest.writeString(mId);
+        dest.writeString(mMovieID);
         dest.writeByte((byte)(mIsFav? 1: 0));
     }
 }

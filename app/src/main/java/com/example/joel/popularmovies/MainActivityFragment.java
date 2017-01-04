@@ -58,6 +58,7 @@ public class MainActivityFragment extends Fragment
     //projection columns
     public static final String[] FAVOURITE_COLUMNS = {
             PopularMoviesContract.FavouriteEntry._ID,
+            PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID,
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE,
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS,
             PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE,
@@ -66,11 +67,12 @@ public class MainActivityFragment extends Fragment
     };
 
     public static final int COL_FAV_ID = 0;
-    public static final int COL_FAV_TITLE = 1;
-    public static final int COL_FAV_SYNOPSIS = 2;
-    public static final int COL_FAV_RELEASE = 3;
-    public static final int COL_FAV_RATING = 4;
-    public static final int COL_FAV_IMGURL = 5;
+    public static final int COL_FAV_MOVIE_ID = 1;
+    public static final int COL_FAV_TITLE = 2;
+    public static final int COL_FAV_SYNOPSIS = 3;
+    public static final int COL_FAV_RELEASE = 4;
+    public static final int COL_FAV_RATING = 5;
+    public static final int COL_FAV_IMGURL = 6;
 
     @Override
     public void onStart() {
@@ -160,7 +162,8 @@ public class MainActivityFragment extends Fragment
         if(data != null && data.moveToFirst()){
             do{
                 Movie movie = new Movie();
-                movie.setmId(data.getString(COL_FAV_ID));
+                //movie.setmId(data.getString(COL_FAV_ID));
+                movie.setmMovieID(data.getString(COL_FAV_MOVIE_ID));
                 movie.setmTtile(data.getString(COL_FAV_TITLE));//title
                 movie.setmSynopsis(data.getString(COL_FAV_SYNOPSIS)); //synopsis
                 movie.setmReleaseDate(data.getString(COL_FAV_RELEASE)); //release
@@ -305,7 +308,7 @@ public class MainActivityFragment extends Fragment
                             .appendEncodedPath(movieObject.getString(Constants.IMAGE_URL_KEY)).build();
 
                     movie.setmImageUrl(builtUri.toString());
-                    movie.setmId(movieObject.getString(Constants.ID));
+                    movie.setmMovieID(movieObject.getString(Constants.ID));
                     movieList.add(movie);
                 }
                 //return the list of movies

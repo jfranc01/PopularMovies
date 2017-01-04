@@ -23,7 +23,8 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
         // along with their details.
         final String CREATE_FAVORITES_TABLE = "CREATE TABLE " +
                 PopularMoviesContract.FavouriteEntry.TABLE_NAME + " ( " +
-                PopularMoviesContract.FavouriteEntry._ID + " INTEGER PRIMARY KEY," +
+                PopularMoviesContract.FavouriteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " TEXT UNIQUE NOT NULL," +
                 PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " TEXT UNIQUE NOT NULL," +
                 PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS + " TEXT NOT NULL," +
                 PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE + " TEXT NOT NULL," +
@@ -41,17 +42,4 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
         //call the onCreate
         onCreate(db);
     }
-
-    /**to get the list of videos,
-     {
-     "id": "577bd56b9251411df60006f9",
-     "iso_639_1": "en",
-     "iso_3166_1": "US",
-     "key": "UnlAXQze1Qg",
-     "name": "A Look Inside",
-     "site": "YouTube",
-     "size": 720,
-     "type": "Featurette"
-     },
-    https://www.youtube.com/watch?v=SUXWAEX2jlg*/
 }

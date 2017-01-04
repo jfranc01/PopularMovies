@@ -53,6 +53,7 @@ public class Utility {
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE, movie.getmReleaseDate());
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_IMGURL, movie.getmImageUrl());
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RATING, movie.getmRating());
+        cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID, movie.getmMovieID());
         return cv;
     }
 }

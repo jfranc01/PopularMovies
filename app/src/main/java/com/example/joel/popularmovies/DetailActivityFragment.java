@@ -9,10 +9,12 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,7 +67,7 @@ public class DetailActivityFragment extends Fragment {
                 movie = intent.getParcelableExtra("movie");
                 //here we create the task to fetch the trailers
                 FetchTrailers fetchTrailers = new FetchTrailers();
-                fetchTrailers.execute(movie.getmId());
+                fetchTrailers.execute(movie.getmMovieID());
             }
         }
 
@@ -121,6 +123,29 @@ public class DetailActivityFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    /**** Method for Setting the Height of the ListView dynamically.
+     **** Hack to fix the issue of not showing all the items of the ListView
+     **** when placed inside a ScrollView  ****/
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) return;
+
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        int totalHeight = 0;
+        View view = null;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            view = listAdapter.getView(i, view, listView);
+            if (i == 0)
+                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += view.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
     }
 
     public class FetchTrailers extends AsyncTask<String, Void, List<Trailer>>{
@@ -220,8 +245,20 @@ public class DetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Trailer> trailers) {
-            TrailerAdapter adapter = new TrailerAdapter(getActivity(), trailers);
-            mTrailerListView.setAdapter(adapter);
+            if(trailers != null && trailers.size()>0) {
+                TrailerAdapter adapter = new TrailerAdapter(getActivity(), trailers);
+                mTrailerListView.setAdapter(adapter);
+                setListViewHeightBasedOnChildren(mTrailerListView);
+                mTrailerListView.setOnTouchListener(new View.OnTouchListener() {
+                    // Setting on Touch Listener for handling the touch inside ScrollView
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        // Disallow the touch request for parent scroll on touch of child view
+                        v.getParent().requestDisallowInterceptTouchEvent(true);
+                        return false;
+                    }
+                });
+            }
         }
     }
 }
