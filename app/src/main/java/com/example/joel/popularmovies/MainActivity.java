@@ -68,13 +68,10 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
 
     @Override
     public void onItemClicked(Movie movie) {
-
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(DetailActivityFragment.DETAIL_MOVIE, movie);
         //if it is two pane
         if(mTwoPane){
-            //create a Bundle
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(DetailActivityFragment.DETAIL_MOVIE, movie);
-
             DetailActivityFragment daf = new DetailActivityFragment();
             daf.setArguments(arguments);
             getSupportFragmentManager().beginTransaction().replace(R.id.movie_detail_container,
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
         }
         else{
             Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra("movie", movie);
+            intent.putExtra(DetailActivityFragment.DETAIL_MOVIE, movie);
             startActivity(intent);
         }
     }
