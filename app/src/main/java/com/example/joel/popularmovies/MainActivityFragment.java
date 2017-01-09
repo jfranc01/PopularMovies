@@ -126,11 +126,13 @@ public class MainActivityFragment extends Fragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie movie = (Movie)parent.getItemAtPosition(position);
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                //call the call back interface's implementation
+                ((DetailActivityFragment.Callbacks)getActivity()).onItemClicked(movie);
+                //Intent intent = new Intent(getActivity(), DetailActivity.class);
                 //place the parceable in the intent
-                intent.putExtra("movie", movie);
+                //intent.putExtra("movie", movie);
                 //start the intent
-                startActivity(intent);
+                //startActivity(intent);
             }
         });
 

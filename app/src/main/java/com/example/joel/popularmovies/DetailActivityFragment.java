@@ -55,7 +55,8 @@ public class DetailActivityFragment extends Fragment {
     public final String LOG_TAG = this.getClass().getSimpleName();
     public final String FAV_ADDED = "Movie saved as favourite!!!!!";
     public final String ALREADY_A_FAV = "Already a favourite!!";
-    Movie movie =  null;
+    static final String DETAIL_MOVIE = "movie";
+    Movie mMovie =  null;
     ListView mTrailerListView = null;
     LinearLayout mReviewLayout = null;
     LayoutInflater mInflator;
@@ -69,9 +70,16 @@ public class DetailActivityFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+    /*
+        Interface
+     */
+    public interface Callbacks{
+        public void onItemClicked(Movie movie);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        intent = getActivity().getIntent();
+        //intent = getActivity().getIntent();
         mInflator = getLayoutInflater(savedInstanceState);
         super.onCreate(savedInstanceState);
     }
@@ -122,15 +130,19 @@ public class DetailActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = null;
         rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        if(intent != null){
-            if(intent.hasExtra("movie")){
-                movie = intent.getParcelableExtra("movie");
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mMovie = arguments.getParcelable(DetailActivityFragment.DETAIL_MOVIE);
+        }
+        if(mMovie != null){
+            //if(intent.hasExtra("movie")){
+               //mMovie = intent.getParcelableExtra("movie");
                 //here we create the task to fetch the trailers
                 FetchTrailers fetchTrailers = new FetchTrailers();
-                fetchTrailers.execute(movie.getmMovieID());
+                fetchTrailers.execute(mMovie.getmMovieID());
                 //here we fetch the reviews
                 FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
-                fetchReviewsTask.execute(movie.getmMovieID());
+                fetchReviewsTask.execute(mMovie.getmMovieID());
 
                 ImageView poster = (ImageView)rootView.findViewById(R.id.detail_poster);
                 TextView title = (TextView)rootView.findViewById(R.id.detail_title);
@@ -151,11 +163,11 @@ public class DetailActivityFragment extends Fragment {
                         startActivity(intent);
                     }
                 });
-                title.setText(movie.getmTtile());
-                rating.setText(movie.getmRating() + "/10");
-                release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
-                synopsis.setText(movie.getmSynopsis());
-                Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
+                title.setText(mMovie.getmTtile());
+                rating.setText(mMovie.getmRating() + "/10");
+                release_date.setText(Utility.formatDate(mMovie.getmReleaseDate()));
+                synopsis.setText(mMovie.getmSynopsis());
+                Picasso.with(getActivity()).load(mMovie.getmImageUrl()).into(poster);
 
                 //get a reference to the star button
                 startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
@@ -171,12 +183,12 @@ public class DetailActivityFragment extends Fragment {
                                         PopularMoviesContract.FavouriteEntry.CONTENT_URI,
                                         MainActivityFragment.FAVOURITE_COLUMNS,
                                         PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
-                                        new String[]{movie.getmTtile()},
+                                        new String[]{mMovie.getmTtile()},
                                         null);
 
                         if(returnCursor!= null && returnCursor.moveToFirst()){
                             if(returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
-                                    .equalsIgnoreCase(movie.getmTtile())) {
+                                    .equalsIgnoreCase(mMovie.getmTtile())) {
                                 Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
                                 toast.show();
                             }
@@ -184,17 +196,17 @@ public class DetailActivityFragment extends Fragment {
                         else {
                             //here we get access to the content resolver and perform an insert into the database
                             Uri returnUri = getContext().getContentResolver().insert
-                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(movie));
+                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(mMovie));
                             if (returnUri != null) {
                                 Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
                             }
                         }
                     }
                 });
-                if(movie.ismIsFav()){
+                if(mMovie.ismIsFav()){
                     startButton.setBackgroundResource(R.drawable.on__star);
                 }
-            }
+            //}
 
             mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
         }
