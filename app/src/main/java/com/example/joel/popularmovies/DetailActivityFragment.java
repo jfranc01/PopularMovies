@@ -63,6 +63,7 @@ public class DetailActivityFragment extends Fragment {
     private TrailerAdapter mTrailerAdapter;
     public final String POPULAR_MOVIES_SHARE_TAG = "#Check out the movie link below: ";
     Trailer mFirstTrailer;
+    ImageButton startButton;
 
     public DetailActivityFragment() {
         setHasOptionsMenu(true);
@@ -119,6 +120,8 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View rootView = null;
+        rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         if(intent != null){
             if(intent.hasExtra("movie")){
                 movie = intent.getParcelableExtra("movie");
@@ -128,74 +131,73 @@ public class DetailActivityFragment extends Fragment {
                 //here we fetch the reviews
                 FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
                 fetchReviewsTask.execute(movie.getmMovieID());
-            }
-        }
 
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        ImageView poster = (ImageView)rootView.findViewById(R.id.detail_poster);
-        TextView title = (TextView)rootView.findViewById(R.id.detail_title);
-        TextView release_date = (TextView)rootView.findViewById(R.id.detail_release_date);
-        TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
-        TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
-        mTrailerListView = (ListView)rootView.findViewById(R.id.traier_list);
-        mTrailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i(LOG_TAG, "Item at position " + String.valueOf(position) + " clicked");
-                //here we need to create an implicit intent
-                Trailer trailer = (Trailer) parent.getItemAtPosition(position);
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri youtubeUri = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
-                        .appendQueryParameter(Constants.YOUTUBE_PARAM_V, trailer.getmKey()).build();
-                intent.setData(youtubeUri);
-                startActivity(intent);
-            }
-        });
-        mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
-        title.setText(movie.getmTtile());
-        rating.setText(movie.getmRating() + "/10");
-        release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
-        synopsis.setText(movie.getmSynopsis());
-        Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
-
-        //get a reference to the star button
-        ImageButton startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
-        if(movie.ismIsFav()){
-            startButton.setBackgroundResource(R.drawable.on__star);
-        }
-        //set on onlicklistener
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(LOG_TAG, "Star button was pressed");
-
-                //first check if this movie is already a favourite
-                Cursor returnCursor = getContext().getContentResolver().
-                        query(
-                                PopularMoviesContract.FavouriteEntry.CONTENT_URI,
-                                MainActivityFragment.FAVOURITE_COLUMNS,
-                                PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
-                                new String[]{movie.getmTtile()},
-                                null);
-
-                if(returnCursor!= null && returnCursor.moveToFirst()){
-                    if(returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
-                            .equalsIgnoreCase(movie.getmTtile())) {
-                            Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
-                            toast.show();
+                ImageView poster = (ImageView)rootView.findViewById(R.id.detail_poster);
+                TextView title = (TextView)rootView.findViewById(R.id.detail_title);
+                TextView release_date = (TextView)rootView.findViewById(R.id.detail_release_date);
+                TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
+                TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
+                mTrailerListView = (ListView)rootView.findViewById(R.id.traier_list);
+                mTrailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Log.i(LOG_TAG, "Item at position " + String.valueOf(position) + " clicked");
+                        //here we need to create an implicit intent
+                        Trailer trailer = (Trailer) parent.getItemAtPosition(position);
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri youtubeUri = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
+                                .appendQueryParameter(Constants.YOUTUBE_PARAM_V, trailer.getmKey()).build();
+                        intent.setData(youtubeUri);
+                        startActivity(intent);
                     }
-                }
-                else {
-                    //here we get access to the content resolver and perform an insert into the database
-                    Uri returnUri = getContext().getContentResolver().insert
-                            (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(movie));
-                    if (returnUri != null) {
-                        Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
+                });
+                title.setText(movie.getmTtile());
+                rating.setText(movie.getmRating() + "/10");
+                release_date.setText(Utility.formatDate(movie.getmReleaseDate()));
+                synopsis.setText(movie.getmSynopsis());
+                Picasso.with(getActivity()).load(movie.getmImageUrl()).into(poster);
+
+                //get a reference to the star button
+                startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
+                //set on onlicklistener
+                startButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(LOG_TAG, "Star button was pressed");
+
+                        //first check if this movie is already a favourite
+                        Cursor returnCursor = getContext().getContentResolver().
+                                query(
+                                        PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                                        MainActivityFragment.FAVOURITE_COLUMNS,
+                                        PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
+                                        new String[]{movie.getmTtile()},
+                                        null);
+
+                        if(returnCursor!= null && returnCursor.moveToFirst()){
+                            if(returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
+                                    .equalsIgnoreCase(movie.getmTtile())) {
+                                Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        }
+                        else {
+                            //here we get access to the content resolver and perform an insert into the database
+                            Uri returnUri = getContext().getContentResolver().insert
+                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(movie));
+                            if (returnUri != null) {
+                                Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
+                            }
+                        }
                     }
+                });
+                if(movie.ismIsFav()){
+                    startButton.setBackgroundResource(R.drawable.on__star);
                 }
             }
-        });
 
+            mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
+        }
         return rootView;
     }
 

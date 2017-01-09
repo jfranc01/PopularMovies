@@ -12,12 +12,31 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
+    private boolean mTwoPane;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Depending on the smallest width, we need to check if the
+        //container is part of the layout. If it is part of the layout,
+        //then we know it is two pane
+        if(findViewById(R.id.movie_detail_container) != null){
+            //set the variable to true
+            mTwoPane = true;
+            //replace the container with a new DetailActivityFragment
+            if(savedInstanceState == null){
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, new DetailActivityFragment())
+                        .commit();
+            }
+        }
+        else{
+            mTwoPane = false;
+        }
     }
 
     @Override
