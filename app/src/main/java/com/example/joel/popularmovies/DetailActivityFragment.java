@@ -65,6 +65,7 @@ public class DetailActivityFragment extends Fragment {
     public final String POPULAR_MOVIES_SHARE_TAG = "#Check out the movie link below: ";
     Trailer mFirstTrailer;
     ImageButton startButton;
+    boolean mIsTwoPane = false;
 
     public DetailActivityFragment() {
         setHasOptionsMenu(true);
@@ -134,6 +135,11 @@ public class DetailActivityFragment extends Fragment {
         if (arguments != null) {
             mMovie = arguments.getParcelable(DetailActivityFragment.DETAIL_MOVIE);
         }
+        else{
+            rootView.setVisibility(View.INVISIBLE);
+            return rootView;
+        }
+        rootView.setVisibility(View.VISIBLE);
         if(mMovie != null){
             //if(intent.hasExtra("movie")){
                //mMovie = intent.getParcelableExtra("movie");

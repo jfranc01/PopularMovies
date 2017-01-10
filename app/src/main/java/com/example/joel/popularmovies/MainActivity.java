@@ -15,7 +15,7 @@ import com.example.joel.popularmovies.model.Movie;
 
 public class MainActivity extends AppCompatActivity implements DetailActivityFragment.Callbacks{
 
-    private boolean mTwoPane;
+    public static boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
 
     @Override

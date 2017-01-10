@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -42,7 +43,7 @@ import java.util.List;
 public class MainActivityFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener{
 
-    GridView mGridView;
+    public static GridView mGridView;
     public final String LOG_TAG = getClass().getSimpleName();
     private static final int FAVOURTIES_LOADER = 1;
     private FavouritesAdapter mFavouritesAdapter;
@@ -112,6 +113,11 @@ public class MainActivityFragment extends Fragment
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -120,7 +126,6 @@ public class MainActivityFragment extends Fragment
         //mFavouritesAdapter = new FavouritesAdapter(getActivity(), null, 0);
         MovieAdapter adapter = new MovieAdapter(getActivity(), null);
         mGridView.setAdapter(mMovieAdapter);
-
         //create the listener for the gridview
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -330,6 +335,10 @@ public class MainActivityFragment extends Fragment
             mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
             //set the adapter
             mGridView.setAdapter(mMovieAdapter);
+
+            if(MainActivity.mTwoPane){
+                mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+            }
         }
     }
 }
