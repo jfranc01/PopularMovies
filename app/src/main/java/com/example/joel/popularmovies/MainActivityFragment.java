@@ -36,6 +36,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -50,6 +52,8 @@ public class MainActivityFragment extends Fragment
     private MovieAdapter mMovieAdapter;
     private List<Movie> mCurrentMovieList;
     private String mCurrentSortOrder;
+
+    private android.os.Handler perfromClick = new android.os.Handler();
 
 
     public MainActivityFragment() {
@@ -177,7 +181,9 @@ public class MainActivityFragment extends Fragment
         mGridView.post(new Runnable() {
             @Override
             public void run() {
-                mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+                if(MainActivity.mTwoPane) {
+                    mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+                }
             }
         });
     }
