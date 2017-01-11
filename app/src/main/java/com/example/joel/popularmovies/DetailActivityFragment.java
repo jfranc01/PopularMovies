@@ -339,7 +339,7 @@ public class DetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Trailer> trailers) {
-            if(trailers != null && trailers.size()>0) {
+            if(trailers != null && trailers.size()>0 && getActivity() != null) {
                 mFirstTrailer = trailers.get(0);
                 mTrailerAdapter = new TrailerAdapter(getActivity(), trailers);
                 mTrailerListView.setAdapter(mTrailerAdapter);

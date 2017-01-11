@@ -92,8 +92,8 @@ public class MainActivityFragment extends Fragment
         if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
             //here we use a AsyncTaskLoader to load items form the database
             getLoaderManager().initLoader(FAVOURTIES_LOADER,null, this);
-            mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
-            mGridView.setAdapter(mMovieAdapter);
+           // mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
+            //mGridView.setAdapter(mMovieAdapter);
         }
         else{
             FetchMovieList fetchMovieList = new FetchMovieList();
@@ -122,22 +122,12 @@ public class MainActivityFragment extends Fragment
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.flavours_grid);
-
-        //mFavouritesAdapter = new FavouritesAdapter(getActivity(), null, 0);
-        MovieAdapter adapter = new MovieAdapter(getActivity(), null);
-        mGridView.setAdapter(mMovieAdapter);
-        //create the listener for the gridview
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie movie = (Movie)parent.getItemAtPosition(position);
                 //call the call back interface's implementation
                 ((DetailActivityFragment.Callbacks)getActivity()).onItemClicked(movie);
-                //Intent intent = new Intent(getActivity(), DetailActivity.class);
-                //place the parceable in the intent
-                //intent.putExtra("movie", movie);
-                //start the intent
-                //startActivity(intent);
             }
         });
 
@@ -184,6 +174,12 @@ public class MainActivityFragment extends Fragment
         mCurrentMovieList = favList;
         mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
         mGridView.setAdapter(mMovieAdapter);
+        mGridView.post(new Runnable() {
+            @Override
+            public void run() {
+                mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+            }
+        });
     }
 
     @Override
