@@ -202,7 +202,7 @@ public class DetailActivityFragment extends Fragment {
                         else {
                             //here we get access to the content resolver and perform an insert into the database
                             Uri returnUri = getContext().getContentResolver().insert
-                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createContentValues(mMovie));
+                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createFavContentValues(mMovie));
                             if (returnUri != null) {
                                 Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
                             }

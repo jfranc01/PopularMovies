@@ -1,5 +1,6 @@
 package com.example.joel.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -36,6 +37,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
@@ -48,6 +50,7 @@ public class MainActivityFragment extends Fragment
     public static GridView mGridView;
     public final String LOG_TAG = getClass().getSimpleName();
     private static final int FAVOURTIES_LOADER = 1;
+    private static final int MOVIES_LOADER = 2;
     private FavouritesAdapter mFavouritesAdapter;
     private MovieAdapter mMovieAdapter;
     private List<Movie> mCurrentMovieList;
@@ -78,6 +81,7 @@ public class MainActivityFragment extends Fragment
     public static final int COL_FAV_RELEASE = 4;
     public static final int COL_FAV_RATING = 5;
     public static final int COL_FAV_IMGURL = 6;
+
 
     @Override
     public void onStart() {
@@ -112,6 +116,8 @@ public class MainActivityFragment extends Fragment
         super.onResume();
         if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
             getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
+        }else{
+            getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
         }
 
     }
@@ -300,12 +306,17 @@ public class MainActivityFragment extends Fragment
         private List<Movie> getMovieDataFromJsonString(String jsonMovieString) {
 
             final ArrayList<Movie>  movieList = new ArrayList<>();
-
+            Vector<ContentValues> cVVector;
             try {
                 JSONObject jsonObj = new JSONObject(jsonMovieString);
                 JSONArray  jsonArray = jsonObj.getJSONArray("results");
+                cVVector = new Vector<ContentValues>(jsonArray.length());
 
                 for(int i = 0; i<jsonArray.length(); i++ ){
+                    JSONObject movieObject = jsonArray.getJSONObject(i);
+                    ContentValues moviewValues =  Utility.createMovieContentValuesFromJSON(movieObject);
+                    cVVector.add(moviewValues);
+                    /*
 
                     JSONObject movieObject = jsonArray.getJSONObject(i);
                     Movie movie = new Movie();
@@ -319,6 +330,7 @@ public class MainActivityFragment extends Fragment
                     movie.setmImageUrl(builtUri.toString());
                     movie.setmMovieID(movieObject.getString(Constants.ID));
                     movieList.add(movie);
+                    */
                 }
                 //return the list of movies
                 return movieList;
