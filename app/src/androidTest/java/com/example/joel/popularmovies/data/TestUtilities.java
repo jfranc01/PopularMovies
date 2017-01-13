@@ -37,6 +37,24 @@ public class TestUtilities extends AndroidTestCase {
         return favouritesValues;
     }
 
+    static ContentValues createMovieValues(){
+        ContentValues movieValues = new ContentValues();
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_IMGURL,
+                "https://www.google.ca/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=r" +
+                        "ja&uact=8&ved=0ahUKEwjB_IHxpJjRAhUG44MKHfhRAS8QjRwIBw&url=http%3A%" +
+                        "2F%2Fen.tintin.com%2Fpersonnages%2Fshow%2Fid%2F15%2Fpage%2F0%2F0%2Ftintin&bvm" +
+                        "=bv.142059868,d.amc&psig=AFQjCNFnP40gRld-BWQqyDEKnsHgvHrqDg&ust=1483062605949650");
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID, "11345");
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_RATING, "8.1");
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_RELEASE, "2016");
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_SYNOPSIS,
+                "My brother and I will order a pizza. What happens next is a thriller!" +
+                        " There will also be desert. Hopefully cheesecake. thi story is about two boys, their, pizza" +
+                        "and desert");
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_TITLE, "Pizza Night!");
+        return movieValues;
+    }
+
     static long insertPizzaNightValues(Context context) {
         // insert our test records into the database
         PopularMoviesDbHelper dbHelper = new PopularMoviesDbHelper(context);
@@ -50,6 +68,21 @@ public class TestUtilities extends AndroidTestCase {
         assertTrue("Error: Failure to insert North Pole Location Values", favRowId != -1);
 
         return favRowId;
+    }
+
+    static long insertMoviePizzaNightValues(Context context){
+        // insert our test records into the database
+        PopularMoviesDbHelper dbHelper = new PopularMoviesDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues testValues = TestUtilities.createMovieValues();
+
+        long movieID;
+        movieID = db.insert(PopularMoviesContract.MovieEntry.TABLE_NAME, null, testValues);
+
+        // Verify we got a row back.
+        assertTrue("Error: Failure to insert North Pole Location Values", movieID != -1);
+
+        return movieID;
     }
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
@@ -69,6 +102,29 @@ public class TestUtilities extends AndroidTestCase {
                     "' did not match the expected value '" +
                     expectedValue + "'. " + error, expectedValue, valueCursor.getString(idx));
         }
+    }
+
+    static public final int BULK_INSERT_RECORDS_TO_INSERT = 10;
+    public static ContentValues[] createBulkInsertValues(){
+        ContentValues[] returnContentValues = new ContentValues[BULK_INSERT_RECORDS_TO_INSERT];
+        for ( int i = 0; i < BULK_INSERT_RECORDS_TO_INSERT; i++) {
+            ContentValues movieValues = new ContentValues();
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_IMGURL,
+                    "https://www.google.ca/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=r" +
+                            "ja&uact=8&ved=0ahUKEwjB_IHxpJjRAhUG44MKHfhRAS8QjRwIBw&url=http%3A%" +
+                            "2F%2Fen.tintin.com%2Fpersonnages%2Fshow%2Fid%2F15%2Fpage%2F0%2F0%2Ftintin&bvm" +
+                            "=bv.142059868,d.amc&psig=AFQjCNFnP40gRld-BWQqyDEKnsHgvHrqDg&ust=1483062605949650");
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID, String.valueOf(i + 100));
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RATING, "8.1");
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE, "2016");
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS,
+                    "My brother and I will order a pizza. What happens next is a thriller!" +
+                            " There will also be desert. Hopefully cheesecake. thi story is about two boys, their, pizza" +
+                            "and desert");
+            movieValues.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE, "Pizza Night!" + i);
+            returnContentValues[i] = movieValues;
+        }
+        return returnContentValues;
     }
 
     static class TestContentObserver extends ContentObserver {

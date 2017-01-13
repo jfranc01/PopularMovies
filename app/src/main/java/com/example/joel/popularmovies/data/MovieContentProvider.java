@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
@@ -12,13 +13,15 @@ import android.support.annotation.Nullable;
  * Created by joel on 2016-12-28.
  */
 
-public class FavouritesProvider extends ContentProvider {
+public class MovieContentProvider extends android.content.ContentProvider {
     /*
         Adding integer constants for the URIs
      */
     public static final int FAVOURITES = 100; // to get all favourites
     public static final int FAVOURITES_ID = 101; // to view a favourite or delete a faovurite
     public static final int FAVOURITES_TITLE = 102; //query for a movie with the title
+    public static final int MOVIES = 200;
+    public static final int MOVIES_ID = 201; //query for a movie
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private PopularMoviesDbHelper dbHelpher;
@@ -29,7 +32,8 @@ public class FavouritesProvider extends ContentProvider {
         matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES, 100 );
         matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/#" , 101);
         matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/*" , 102);
-
+        matcher.addURI(authority, PopularMoviesContract.PATH_MOVIES, 200);
+        matcher.addURI(authority, PopularMoviesContract.PATH_MOVIES + "/#", 201);
 
         return matcher;
     }
@@ -48,6 +52,31 @@ public class FavouritesProvider extends ContentProvider {
         int match = sUriMatcher.match(uri);
         Cursor retCursor;
         switch (match){
+
+            case MOVIES:
+                retCursor = dbHelpher.getReadableDatabase().query(
+                        PopularMoviesContract.MovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+
+            case MOVIES_ID:
+                retCursor =  dbHelpher.getReadableDatabase().query(
+                        PopularMoviesContract.MovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+
             case FAVOURITES:
                 retCursor = dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,
@@ -119,6 +148,14 @@ public class FavouritesProvider extends ContentProvider {
                 return PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
             }
 
+            case MOVIES:{
+                return PopularMoviesContract.MovieEntry.CONTENT_TYPE;
+            }
+
+            case MOVIES_ID:{
+                return PopularMoviesContract.MovieEntry.CONTENT_TYPE_ITEM;
+            }
+
             default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
 
@@ -138,6 +175,20 @@ public class FavouritesProvider extends ContentProvider {
                         );
                 if(_id>0){
                     returnUri = PopularMoviesContract.FavouriteEntry.buildPopularMoviesUri(_id);
+                }
+                else{
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                }
+                break;
+            }
+            case MOVIES:{
+                long _id = dbHelpher.getWritableDatabase().insert(
+                        PopularMoviesContract.MovieEntry.TABLE_NAME,
+                        null,
+                        values
+                );
+                if(_id>0){
+                    returnUri = PopularMoviesContract.MovieEntry.buildPopularMoviesUri(_id);
                 }
                 else{
                     throw new android.database.SQLException("Failed to insert row into " + uri);
@@ -165,6 +216,13 @@ public class FavouritesProvider extends ContentProvider {
                         selection, selectionArgs);
                 break;
             }
+
+            case MOVIES:{
+                rowsDeleted =  dbHelpher.getWritableDatabase()
+                        .delete(PopularMoviesContract.MovieEntry.TABLE_NAME,
+                                selection, selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
@@ -177,5 +235,33 @@ public class FavouritesProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = dbHelpher.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+
+        switch (match){
+            case MOVIES:{
+                db.beginTransaction();
+                int returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(PopularMoviesContract.MovieEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            }
+            default:
+                return super.bulkInsert(uri, values);
+        }
     }
 }

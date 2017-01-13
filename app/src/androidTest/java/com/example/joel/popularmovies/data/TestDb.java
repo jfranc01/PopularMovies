@@ -34,6 +34,7 @@ public class TestDb extends AndroidTestCase {
         //Create a hashset of the table name that we want to search for
         final HashSet<String> tableNameHashSet = new HashSet<String>();
         tableNameHashSet.add(PopularMoviesContract.FavouriteEntry.TABLE_NAME);
+        tableNameHashSet.add(PopularMoviesContract.MovieEntry.TABLE_NAME);
 
         //delete the existing database
         mContext.deleteDatabase(PopularMoviesDbHelper.DATABASE_NAME);

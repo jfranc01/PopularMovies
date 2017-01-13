@@ -41,7 +41,7 @@
         </activity>
         <provider
             android:authorities="com.example.joel.popularmovies"
-            android:name=".data.FavouritesProvider"
+            android:name=".data.MovieContentProvider"
             android:exported="false"/>
     </application>
 

@@ -19,6 +19,21 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        //Create a table called movies that will hold the movies based on the popularity
+        //or rating
+        final String CREATE_MOVIES_TABLE = "CREATE TABLE " +
+                PopularMoviesContract.MovieEntry.TABLE_NAME + " ( " +
+                PopularMoviesContract.MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID + " TEXT UNIQUE NOT NULL," +
+                PopularMoviesContract.MovieEntry.COLUMN_NAME_TITLE + " TEXT UNIQUE NOT NULL," +
+                PopularMoviesContract.MovieEntry.COLUMN_NAME_SYNOPSIS + " TEXT NOT NULL," +
+                PopularMoviesContract.MovieEntry.COLUMN_NAME_RELEASE + " TEXT NOT NULL," +
+                PopularMoviesContract.MovieEntry.COLUMN_NAME_IMGURL + " TEXT NOT NULL," +
+                PopularMoviesContract.MovieEntry.COLUMN_NAME_RATING + " TEXT NOT NULL" + " ) ";
+
+        //create the table by calling the execute method
+        db.execSQL(CREATE_MOVIES_TABLE);
+
         // Create a table called Favourites that will hold the "favouritied" movies
         // along with their details.
         final String CREATE_FAVORITES_TABLE = "CREATE TABLE " +
@@ -39,6 +54,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //For a BD Upgrade, we decide to drop the table and create it again
         db.execSQL("DROP TABLE IF EXISTS " + PopularMoviesContract.FavouriteEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + PopularMoviesContract.MovieEntry.TABLE_NAME);
         //call the onCreate
         onCreate(db);
     }

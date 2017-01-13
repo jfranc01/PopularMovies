@@ -17,11 +17,11 @@ public class TestUriMatcher extends AndroidTestCase {
             PopularMoviesContract.FavouriteEntry.buildPopularMoviesUri(TEST_RECORD_ID);
 
     public void testUriMatcher(){
-        UriMatcher testMatcher= FavouritesProvider.buildUriMatcher();
+        UriMatcher testMatcher= MovieContentProvider.buildUriMatcher();
         assertEquals("Error: The FAVOURITES URI was matched incorrectly.",
-                testMatcher.match(TEST_FAVOURITES_DIR), FavouritesProvider.FAVOURITES);
+                testMatcher.match(TEST_FAVOURITES_DIR), MovieContentProvider.FAVOURITES);
         assertEquals("Error: The FAVOURITES WITH ID URI was matched incorrectly.",
-                testMatcher.match(TEST_FAVOURITES_WITH_ID), FavouritesProvider.FAVOURITES_ID);
+                testMatcher.match(TEST_FAVOURITES_WITH_ID), MovieContentProvider.FAVOURITES_ID);
     }
 
 }
