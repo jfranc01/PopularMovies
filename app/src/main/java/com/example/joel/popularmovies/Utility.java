@@ -1,7 +1,10 @@
 package com.example.joel.popularmovies;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.joel.popularmovies.data.PopularMoviesContract;
@@ -61,7 +64,12 @@ public class Utility {
         return cv;
     }
 
-
+    /**
+     * Method will create ContentValues by passing in a JSONObject
+     * @param movieObject
+     * @return
+     * @throws JSONException
+     */
     public static ContentValues createMovieContentValuesFromJSON(JSONObject movieObject ) throws JSONException {
         ContentValues movieValues = new ContentValues();
         movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_TITLE,
@@ -75,8 +83,25 @@ public class Utility {
         Uri builtUri = Uri.parse(Constants.BASE_IMAGE_URL).buildUpon()
                 .appendEncodedPath(movieObject.getString(Constants.IMAGE_URL_KEY)).build();
         movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_IMGURL, builtUri.toString());
-        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID, Constants.ID);
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID, movieObject.getString(Constants.ID));
 
         return movieValues;
+    }
+
+    /**
+     * Method will return the default category of the movie choice
+     * by retrieving the shared Preferences. If one hasn't been set then
+     * the default gets saved!
+     * @param context
+     * @return
+     */
+    public static String getCurrentCategory(Context context ){
+        SharedPreferences sharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(context);
+
+        String category = sharedPrefs.getString(context.getString(R.string.sort_order_key),
+                context.getString(R.string.sort_order_default));
+
+        return category;
     }
 }

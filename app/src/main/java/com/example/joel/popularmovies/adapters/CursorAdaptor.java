@@ -20,9 +20,9 @@ import com.squareup.picasso.Picasso;
  * so that we can bind an arraylist to the original adapter
  */
 
-public class FavouritesAdapter extends CursorAdapter {
+public class CursorAdaptor extends CursorAdapter {
 
-    public FavouritesAdapter(Context context, Cursor cursor, int flags){
+    public CursorAdaptor(Context context, Cursor cursor, int flags){
         super(context, cursor, flags);
 
     }

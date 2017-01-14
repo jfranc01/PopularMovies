@@ -2,7 +2,7 @@
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_detail">DetailActivity</string>
-    <string name="sort_order">Sort Order</string>
+    <string name="sort_order">Categories</string>
     <string name="sort_order_choice_popularity">Popularity</string>
     <string name="sort_order_choice_favourites">Favourites</string>
     <string name="sort_order_choice_rating">Rating</string>
@@ -15,4 +15,5 @@
     <string name="trailer_title">Trailers</string>
     <string name="review_title">Reviews</string>
     <string name="action_share">Share</string>
+    <string name="action_refresh">Refresh</string>
 </resources>
