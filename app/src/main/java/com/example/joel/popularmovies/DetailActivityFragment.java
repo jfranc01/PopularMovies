@@ -54,11 +54,9 @@ import java.util.List;
  */
 public class DetailActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    Movie mMovie = null;
-
-
-    LayoutInflater mInflator;
-
+    private Movie mMovie = null;
+    private LayoutInflater mInflator;
+    private String mMovieID;
     private Uri mUri;
     private ImageView mPoster;
     private TextView mTitle;
@@ -77,7 +75,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     public final String ALREADY_A_FAV = "Already a favourite!!";
     static final String DETAIL_URI = "uri";
 
-    public static final int DETAIL_LOADER = 3;
+    public static final int MOVIE_LOADER = 3;
+    public static final int FAV_LOADER = 4;
 
     public static final String[] DETAIL_COLUMNS = {
             PopularMoviesContract.MovieEntry._ID,
@@ -101,31 +100,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         setHasOptionsMenu(true);
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (null != mUri) {
-            return new CursorLoader(getActivity(), mUri, DETAIL_COLUMNS, null, null, null);
-        }
-
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data != null && data.moveToFirst()) {
-            mTitle.setText(data.getString(COL_TITLE));
-            mRating.setText(data.getString(COL_RATING) + "/10");
-            mRelease_date.setText(Utility.formatDate(data.getString(COL_RELEASE)));
-            mSynopsis.setText(data.getString(COL_SYNOPSIS));
-            Picasso.with(getActivity()).load(data.getString(COL_IMGURL)).into(mPoster);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        //do nothing
-    }
-
     /*
         Interface
      */
@@ -140,66 +114,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        //start the loader to read from the database
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-        //retrieve the movie id from the uri
-        if (mUri != null) {
-            String movieID = PopularMoviesContract.MovieEntry.getMovieIDFromUri(mUri);
-            if (movieID != null) {
-                //call the task to get the trailers and the reviews
-                FetchTrailers fetchTrailers = new FetchTrailers();
-                fetchTrailers.execute(movieID);
-                //here we fetch the reviews
-                FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
-                fetchReviewsTask.execute(movieID);
-            }
-        }
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_menu, menu);
-        //Retrieve the menu item
-        MenuItem shareItem = menu.findItem(R.id.action_share);
-        //get the action Provider
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-        if (mTrailerAdapter != null) {
-            mShareActionProvider.setShareIntent(createShareForecastIntent());
-        }
-    }
-
-    private Intent createShareForecastIntent() {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, POPULAR_MOVIES_SHARE_TAG + getFirstTrailerLink());
-        return shareIntent;
-    }
-
-    private String getFirstTrailerLink() {
-
-        if (mTrailerAdapter != null && mFirstTrailer != null) {
-            Uri link = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
-                    .appendQueryParameter(Constants.YOUTUBE_PARAM_V,
-                            mFirstTrailer.getmKey()).build();
-
-            URL url = null;
-            try {
-                url = new URL(link.toString());
-                return url.toString();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                Log.i(LOG_TAG, "Error getting share link for video: ");
-                return null;
-            }
-        }
-
-        return null;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = null;
@@ -207,6 +121,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
         Bundle arguments = getArguments();
         if (arguments != null) {
             mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
+            mMovieID = mUri.getPathSegments().get(1);
             Log.i(LOG_TAG, "Passed in URI: " + mUri.toString());
         } else {
             rootView.setVisibility(View.INVISIBLE);
@@ -239,39 +154,143 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             @Override
             public void onClick(View v) {
                 Log.i(LOG_TAG, "Star button was pressed");
+                if (mMovieID != null){
+                    //first check if this movie is already a favourite
+                    Cursor returnCursor = getContext().getContentResolver().
+                            query(
+                                    PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                                    MainActivityFragment.FAVOURITE_COLUMNS,
+                                    PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ",
+                                    new String[]{mMovieID},
+                                    null);
 
-                //first check if this movie is already a favourite
-                Cursor returnCursor = getContext().getContentResolver().
-                        query(
-                                PopularMoviesContract.FavouriteEntry.CONTENT_URI,
-                                MainActivityFragment.FAVOURITE_COLUMNS,
-                                PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
-                                new String[]{mMovie.getmTtile()},
-                                null);
-
-                if (returnCursor != null && returnCursor.moveToFirst()) {
-                    if (returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
-                            .equalsIgnoreCase(mMovie.getmTtile())) {
-                        Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                } else {
-                    //here we get access to the content resolver and perform an insert into the database
-                    Uri returnUri = getContext().getContentResolver().insert
-                            (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createFavContentValues(mMovie));
-                    if (returnUri != null) {
-                        Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
+                    if (returnCursor != null && returnCursor.moveToFirst()) {
+                        if (returnCursor.getString(COL_MOVIE_ID)
+                                .equalsIgnoreCase(mMovieID)) {
+                            Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    } else {
+                        //here we get access to the content resolver and perform an insert into the database
+                        Uri returnUri = getContext().getContentResolver().insert
+                                (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createFavContentValues(mMovie));
+                        if (returnUri != null) {
+                            Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
+                            startButton.setBackgroundResource(R.drawable.on__star);
+                        }
                     }
                 }
             }
         });
-        //if (mMovie.ismIsFav()) {
-         //   startButton.setBackgroundResource(R.drawable.on__star);
-        //}
-        //}
+        //here we query the movie and see if it is a favourite and set the star logo
+        Cursor returnCursor = getContext().getContentResolver().
+                query(
+                        PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                        MainActivityFragment.FAVOURITE_COLUMNS,
+                        PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ",
+                        new String[]{mMovieID},
+                        null);
+        if (returnCursor != null && returnCursor.moveToFirst()) {
+            if (returnCursor.getString(COL_MOVIE_ID)
+                    .equalsIgnoreCase(mMovieID)) {
+                startButton.setBackgroundResource(R.drawable.on__star);
+            }
+        }
 
         mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        //start the loader to read from the database
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        //retrieve the movie id from the uri
+        if (mUri != null) {
+            String movieID = PopularMoviesContract.MovieEntry.getMovieIDFromUri(mUri);
+            if (movieID != null) {
+                //call the task to get the trailers and the reviews
+                FetchTrailers fetchTrailers = new FetchTrailers();
+                fetchTrailers.execute(movieID);
+                //here we fetch the reviews
+                FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
+                fetchReviewsTask.execute(movieID);
+            }
+        }
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_menu, menu);
+        //Retrieve the menu item
+        MenuItem shareItem = menu.findItem(R.id.action_share);
+        //get the action Provider
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        if (mTrailerAdapter != null) {
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (null != mUri) {
+            return new CursorLoader(getActivity(), mUri, DETAIL_COLUMNS, null, null, null);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null && data.moveToFirst()) {
+            mMovie = new Movie();
+            mMovie.setmMovieID(data.getString(COL_MOVIE_ID));
+            mMovie.setmTtile(data.getString(COL_TITLE));
+            mMovie.setmRating(data.getString(COL_RATING));
+            mMovie.setmReleaseDate(data.getString(COL_RELEASE));
+            mMovie.setmSynopsis(data.getString(COL_SYNOPSIS));
+            mMovie.setmImageUrl(data.getString(COL_IMGURL));
+            mTitle.setText(mMovie.getmTtile());
+            mRating.setText(mMovie.getmRating() + "/10");
+            mRelease_date.setText(Utility.formatDate(mMovie.getmReleaseDate()));
+            mSynopsis.setText(mMovie.getmSynopsis());
+            Picasso.with(getActivity()).load(data.getString(COL_IMGURL)).into(mPoster);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        //do nothing
+    }
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, POPULAR_MOVIES_SHARE_TAG + getFirstTrailerLink());
+        return shareIntent;
+    }
+
+    private String getFirstTrailerLink() {
+
+        if (mTrailerAdapter != null && mFirstTrailer != null) {
+            Uri link = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
+                    .appendQueryParameter(Constants.YOUTUBE_PARAM_V,
+                            mFirstTrailer.getmKey()).build();
+
+            URL url = null;
+            try {
+                url = new URL(link.toString());
+                return url.toString();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                Log.i(LOG_TAG, "Error getting share link for video: ");
+                return null;
+            }
+        }
+
+        return null;
     }
 
     /****
@@ -456,7 +475,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                 }
 
                 String jsonReviewString = buffer.toString();
-               // Log.i(LOG_TAG, "Json review string: " + jsonReviewString);
+                // Log.i(LOG_TAG, "Json review string: " + jsonReviewString);
                 return getReviewsFromJsonString(jsonReviewString);
 
             } catch (MalformedURLException e) {
