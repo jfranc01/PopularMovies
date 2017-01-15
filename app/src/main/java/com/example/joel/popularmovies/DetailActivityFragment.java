@@ -7,6 +7,9 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -49,40 +52,110 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class DetailActivityFragment extends Fragment {
+public class DetailActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    Intent intent;
+    Movie mMovie = null;
+
+
+    LayoutInflater mInflator;
+
+    private Uri mUri;
+    private ImageView mPoster;
+    private TextView mTitle;
+    private TextView mRelease_date;
+    private TextView mRating;
+    private TextView mSynopsis;
+    private Trailer mFirstTrailer;
+    private ImageButton startButton;
+    private ShareActionProvider mShareActionProvider;
+    private TrailerAdapter mTrailerAdapter;
+    private LinearLayout mReviewLayout = null;
+    private ListView mTrailerListView = null;
+    private final String POPULAR_MOVIES_SHARE_TAG = "#Check out the movie link below: ";
     public final String LOG_TAG = this.getClass().getSimpleName();
     public final String FAV_ADDED = "Movie saved as favourite!!!!!";
     public final String ALREADY_A_FAV = "Already a favourite!!";
-    static final String DETAIL_MOVIE = "movie";
-    Movie mMovie =  null;
-    ListView mTrailerListView = null;
-    LinearLayout mReviewLayout = null;
-    LayoutInflater mInflator;
-    private ShareActionProvider mShareActionProvider;
-    private TrailerAdapter mTrailerAdapter;
-    public final String POPULAR_MOVIES_SHARE_TAG = "#Check out the movie link below: ";
-    Trailer mFirstTrailer;
-    ImageButton startButton;
-    boolean mIsTwoPane = false;
+    static final String DETAIL_URI = "uri";
+
+    public static final int DETAIL_LOADER = 3;
+
+    public static final String[] DETAIL_COLUMNS = {
+            PopularMoviesContract.MovieEntry._ID,
+            PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID,
+            PopularMoviesContract.MovieEntry.COLUMN_NAME_TITLE,
+            PopularMoviesContract.MovieEntry.COLUMN_NAME_SYNOPSIS,
+            PopularMoviesContract.MovieEntry.COLUMN_NAME_RELEASE,
+            PopularMoviesContract.MovieEntry.COLUMN_NAME_RATING,
+            PopularMoviesContract.MovieEntry.COLUMN_NAME_IMGURL
+    };
+
+    public static final int COL_ID = 0;
+    public static final int COL_MOVIE_ID = 1;
+    public static final int COL_TITLE = 2;
+    public static final int COL_SYNOPSIS = 3;
+    public static final int COL_RELEASE = 4;
+    public static final int COL_RATING = 5;
+    public static final int COL_IMGURL = 6;
 
     public DetailActivityFragment() {
         setHasOptionsMenu(true);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (null != mUri) {
+            return new CursorLoader(getActivity(), mUri, DETAIL_COLUMNS, null, null, null);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data != null && data.moveToFirst()) {
+            mTitle.setText(data.getString(COL_TITLE));
+            mRating.setText(data.getString(COL_RATING) + "/10");
+            mRelease_date.setText(Utility.formatDate(data.getString(COL_RELEASE)));
+            mSynopsis.setText(data.getString(COL_SYNOPSIS));
+            Picasso.with(getActivity()).load(data.getString(COL_IMGURL)).into(mPoster);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        //do nothing
+    }
+
     /*
         Interface
      */
-    public interface Callbacks{
-        public void onItemClicked(Movie movie);
+    public interface Callbacks {
+        public void onItemClicked(Uri uri);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        //intent = getActivity().getIntent();
         mInflator = getLayoutInflater(savedInstanceState);
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        //start the loader to read from the database
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        //retrieve the movie id from the uri
+        if (mUri != null) {
+            String movieID = PopularMoviesContract.MovieEntry.getMovieIDFromUri(mUri);
+            if (movieID != null) {
+                //call the task to get the trailers and the reviews
+                FetchTrailers fetchTrailers = new FetchTrailers();
+                fetchTrailers.execute(movieID);
+                //here we fetch the reviews
+                FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
+                fetchReviewsTask.execute(movieID);
+            }
+        }
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -92,7 +165,7 @@ public class DetailActivityFragment extends Fragment {
         MenuItem shareItem = menu.findItem(R.id.action_share);
         //get the action Provider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-        if(mTrailerAdapter != null){
+        if (mTrailerAdapter != null) {
             mShareActionProvider.setShareIntent(createShareForecastIntent());
         }
     }
@@ -105,9 +178,9 @@ public class DetailActivityFragment extends Fragment {
         return shareIntent;
     }
 
-    private String getFirstTrailerLink(){
+    private String getFirstTrailerLink() {
 
-        if(mTrailerAdapter!= null && mFirstTrailer  !=  null){
+        if (mTrailerAdapter != null && mFirstTrailer != null) {
             Uri link = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
                     .appendQueryParameter(Constants.YOUTUBE_PARAM_V,
                             mFirstTrailer.getmKey()).build();
@@ -133,95 +206,79 @@ public class DetailActivityFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mMovie = arguments.getParcelable(DetailActivityFragment.DETAIL_MOVIE);
-        }
-        else{
+            mUri = arguments.getParcelable(DetailActivityFragment.DETAIL_URI);
+            Log.i(LOG_TAG, "Passed in URI: " + mUri.toString());
+        } else {
             rootView.setVisibility(View.INVISIBLE);
             return rootView;
         }
         rootView.setVisibility(View.VISIBLE);
-        if(mMovie != null){
-            //if(intent.hasExtra("movie")){
-               //mMovie = intent.getParcelableExtra("movie");
-                //here we create the task to fetch the trailers
-                FetchTrailers fetchTrailers = new FetchTrailers();
-                fetchTrailers.execute(mMovie.getmMovieID());
-                //here we fetch the reviews
-                FetchReviewsTask fetchReviewsTask = new FetchReviewsTask();
-                fetchReviewsTask.execute(mMovie.getmMovieID());
+        mPoster = (ImageView) rootView.findViewById(R.id.detail_poster);
+        mTitle = (TextView) rootView.findViewById(R.id.detail_title);
+        mRelease_date = (TextView) rootView.findViewById(R.id.detail_release_date);
+        mRating = (TextView) rootView.findViewById(R.id.detail_rating);
+        mSynopsis = (TextView) rootView.findViewById(R.id.detail_sysnopsis);
+        mTrailerListView = (ListView) rootView.findViewById(R.id.traier_list);
+        mTrailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i(LOG_TAG, "Item at position " + String.valueOf(position) + " clicked");
+                //here we need to create an implicit intent
+                Trailer trailer = (Trailer) parent.getItemAtPosition(position);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri youtubeUri = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
+                        .appendQueryParameter(Constants.YOUTUBE_PARAM_V, trailer.getmKey()).build();
+                intent.setData(youtubeUri);
+                startActivity(intent);
+            }
+        });
+        //get a reference to the star button
+        startButton = (ImageButton) rootView.findViewById(R.id.starButtton);
+        //set on onlicklistener
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Star button was pressed");
 
-                ImageView poster = (ImageView)rootView.findViewById(R.id.detail_poster);
-                TextView title = (TextView)rootView.findViewById(R.id.detail_title);
-                TextView release_date = (TextView)rootView.findViewById(R.id.detail_release_date);
-                TextView rating  = (TextView)rootView.findViewById(R.id.detail_rating);
-                TextView synopsis = (TextView)rootView.findViewById(R.id.detail_sysnopsis);
-                mTrailerListView = (ListView)rootView.findViewById(R.id.traier_list);
-                mTrailerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Log.i(LOG_TAG, "Item at position " + String.valueOf(position) + " clicked");
-                        //here we need to create an implicit intent
-                        Trailer trailer = (Trailer) parent.getItemAtPosition(position);
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri youtubeUri = Uri.parse(Constants.YOUTBE_BASE_URI).buildUpon()
-                                .appendQueryParameter(Constants.YOUTUBE_PARAM_V, trailer.getmKey()).build();
-                        intent.setData(youtubeUri);
-                        startActivity(intent);
+                //first check if this movie is already a favourite
+                Cursor returnCursor = getContext().getContentResolver().
+                        query(
+                                PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                                MainActivityFragment.FAVOURITE_COLUMNS,
+                                PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
+                                new String[]{mMovie.getmTtile()},
+                                null);
+
+                if (returnCursor != null && returnCursor.moveToFirst()) {
+                    if (returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
+                            .equalsIgnoreCase(mMovie.getmTtile())) {
+                        Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
+                        toast.show();
                     }
-                });
-                title.setText(mMovie.getmTtile());
-                rating.setText(mMovie.getmRating() + "/10");
-                release_date.setText(Utility.formatDate(mMovie.getmReleaseDate()));
-                synopsis.setText(mMovie.getmSynopsis());
-                Picasso.with(getActivity()).load(mMovie.getmImageUrl()).into(poster);
-
-                //get a reference to the star button
-                startButton = (ImageButton)rootView.findViewById(R.id.starButtton);
-                //set on onlicklistener
-                startButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i(LOG_TAG, "Star button was pressed");
-
-                        //first check if this movie is already a favourite
-                        Cursor returnCursor = getContext().getContentResolver().
-                                query(
-                                        PopularMoviesContract.FavouriteEntry.CONTENT_URI,
-                                        MainActivityFragment.FAVOURITE_COLUMNS,
-                                        PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE + " = ? ",
-                                        new String[]{mMovie.getmTtile()},
-                                        null);
-
-                        if(returnCursor!= null && returnCursor.moveToFirst()){
-                            if(returnCursor.getString(MainActivityFragment.COL_FAV_TITLE)
-                                    .equalsIgnoreCase(mMovie.getmTtile())) {
-                                Toast toast = Toast.makeText(getContext(), ALREADY_A_FAV, Toast.LENGTH_SHORT);
-                                toast.show();
-                            }
-                        }
-                        else {
-                            //here we get access to the content resolver and perform an insert into the database
-                            Uri returnUri = getContext().getContentResolver().insert
-                                    (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createFavContentValues(mMovie));
-                            if (returnUri != null) {
-                                Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                } else {
+                    //here we get access to the content resolver and perform an insert into the database
+                    Uri returnUri = getContext().getContentResolver().insert
+                            (PopularMoviesContract.FavouriteEntry.CONTENT_URI, Utility.createFavContentValues(mMovie));
+                    if (returnUri != null) {
+                        Toast.makeText(getContext(), FAV_ADDED, Toast.LENGTH_SHORT).show();
                     }
-                });
-                if(mMovie.ismIsFav()){
-                    startButton.setBackgroundResource(R.drawable.on__star);
                 }
-            //}
+            }
+        });
+        //if (mMovie.ismIsFav()) {
+         //   startButton.setBackgroundResource(R.drawable.on__star);
+        //}
+        //}
 
-            mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
-        }
+        mReviewLayout = (LinearLayout) rootView.findViewById(R.id.review_layout);
         return rootView;
     }
 
-    /**** Method for Setting the Height of the ListView dynamically.
-     **** Hack to fix the issue of not showing all the items of the ListView
-     **** when placed inside a ScrollView  ****/
+    /****
+     * Method for Setting the Height of the ListView dynamically.
+     * *** Hack to fix the issue of not showing all the items of the ListView
+     * *** when placed inside a ScrollView
+     ****/
     public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) return;
@@ -242,54 +299,54 @@ public class DetailActivityFragment extends Fragment {
         listView.setLayoutParams(params);
     }
 
-    public class FetchTrailers extends AsyncTask<String, Void, List<Trailer>>{
+    public class FetchTrailers extends AsyncTask<String, Void, List<Trailer>> {
 
         private final String LOG_TAG = getClass().getSimpleName();
 
         @Override
         protected List<Trailer> doInBackground(String... params) {
             //get the movie name
-            String movieId =  params[0];
+            String movieId = params[0];
             HttpURLConnection httpUrlConn = null;
             InputStreamReader isr;
             BufferedReader br = null;
             String jsonTrailerString = null;
 
-            try{
+            try {
                 Uri builtUri = Uri.parse(Constants.BASE_URL).buildUpon()
                         .appendEncodedPath(movieId)
                         .appendEncodedPath(Constants.ADD_ON_VIDEOS_SEGMENT)
                         .appendQueryParameter(Constants.API_KEY_PARAM,
                                 BuildConfig.OPEN_MOVIE_DB_API_KEY).build();
 
-                Log.i(LOG_TAG, "Trailer URI: " +  builtUri.toString());
+                //Log.i(LOG_TAG, "Trailer URI: " + builtUri.toString());
 
                 //create the url and open the connection
                 URL url = new URL(builtUri.toString());
                 //open the connection
-                httpUrlConn =  (HttpURLConnection)url.openConnection();
+                httpUrlConn = (HttpURLConnection) url.openConnection();
                 //set the request type
                 httpUrlConn.setRequestMethod("GET");
                 //connect
                 httpUrlConn.connect();
                 isr = new InputStreamReader(httpUrlConn.getInputStream());
-                if(isr ==  null){
+                if (isr == null) {
                     return null;
                 }
                 StringBuffer buffer = new StringBuffer();
                 //cretae a new buffered reader
                 br = new BufferedReader(isr);
                 String line;
-                while((line = br.readLine()) != null){
+                while ((line = br.readLine()) != null) {
                     buffer.append(line + "\n");
                 }
 
-                if(buffer.length() == 0){
+                if (buffer.length() == 0) {
                     return null;
                 }
 
                 jsonTrailerString = buffer.toString();
-                Log.i(LOG_TAG, "JSON Trailer String: " +  jsonTrailerString);
+                //Log.i(LOG_TAG, "JSON Trailer String: " + jsonTrailerString);
                 //here we need to parse the json object and fetch the data
                 //that we need
                 return getTrailerDataFromJsonString(jsonTrailerString);
@@ -300,12 +357,12 @@ public class DetailActivityFragment extends Fragment {
             } catch (IOException e) {
                 Log.i(LOG_TAG, "Error: I/O Exception ");
                 e.printStackTrace();
-            }finally{
-                if(httpUrlConn != null){
+            } finally {
+                if (httpUrlConn != null) {
                     httpUrlConn.disconnect();
                 }
-                if(br != null){
-                    try{
+                if (br != null) {
+                    try {
                         br.close();
                     } catch (IOException e) {
                         Log.e(LOG_TAG, " Cannot close stream reader: " + e.getMessage());
@@ -315,12 +372,12 @@ public class DetailActivityFragment extends Fragment {
             return null;
         }
 
-        public List<Trailer> getTrailerDataFromJsonString(String trailerString){
+        public List<Trailer> getTrailerDataFromJsonString(String trailerString) {
             final List<Trailer> trailerList = new ArrayList<>();
-            try{
+            try {
                 JSONObject jsonObject = new JSONObject(trailerString);
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
-                for(int i = 0; i<jsonArray.length(); i++){
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject trailerObj = jsonArray.getJSONObject(i);
                     Trailer trailer = new Trailer();
                     trailer.setmTrailerId(trailerObj.getString(Constants.TRAILER_ID_KEY));
@@ -339,7 +396,7 @@ public class DetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Trailer> trailers) {
-            if(trailers != null && trailers.size()>0 && getActivity() != null) {
+            if (trailers != null && trailers.size() > 0 && getActivity() != null) {
                 mFirstTrailer = trailers.get(0);
                 mTrailerAdapter = new TrailerAdapter(getActivity(), trailers);
                 mTrailerListView.setAdapter(mTrailerAdapter);
@@ -357,9 +414,9 @@ public class DetailActivityFragment extends Fragment {
         }
     }
 
-    public class FetchReviewsTask extends AsyncTask<String, Void, List<Review>>{
+    public class FetchReviewsTask extends AsyncTask<String, Void, List<Review>> {
 
-       final String LOG_TAG = getClass().getSimpleName();
+        final String LOG_TAG = getClass().getSimpleName();
 
 
         @Override
@@ -370,36 +427,36 @@ public class DetailActivityFragment extends Fragment {
             InputStreamReader isr = null;
             String movieID = params[0];
 
-            try{
+            try {
                 Uri builtUri = Uri.parse(Constants.BASE_URL)
                         .buildUpon().appendEncodedPath(movieID)
                         .appendEncodedPath(Constants.ADD_ON_REVIEWS_SEGMENT)
                         .appendQueryParameter(Constants.API_KEY_PARAM,
                                 BuildConfig.OPEN_MOVIE_DB_API_KEY).build();
 
-                Log.i(LOG_TAG, "Built Uri: " + builtUri.toString());
+                //Log.i(LOG_TAG, "Built Uri: " + builtUri.toString());
 
                 URL url = new URL(builtUri.toString());
-                httpURLConnection = (HttpURLConnection)url.openConnection();
+                httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.connect();
                 isr = new InputStreamReader(httpURLConnection.getInputStream());
-                if(isr == null){
+                if (isr == null) {
                     return null;
                 }
                 br = new BufferedReader(isr);
                 String line;
                 StringBuffer buffer = new StringBuffer();
-                while((line = br.readLine()) != null){
+                while ((line = br.readLine()) != null) {
                     buffer.append(line + "\n");
                 }
 
-                if(buffer.length() == 0){
+                if (buffer.length() == 0) {
                     return null;
                 }
 
                 String jsonReviewString = buffer.toString();
-                Log.i(LOG_TAG, "Json review string: " + jsonReviewString);
+               // Log.i(LOG_TAG, "Json review string: " + jsonReviewString);
                 return getReviewsFromJsonString(jsonReviewString);
 
             } catch (MalformedURLException e) {
@@ -408,11 +465,11 @@ public class DetailActivityFragment extends Fragment {
             } catch (IOException e) {
                 Log.i(LOG_TAG, "Error can't open connection: " + e.getMessage());
                 e.printStackTrace();
-            }finally{
-                if (httpURLConnection != null){
+            } finally {
+                if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
                 }
-                if(br != null){
+                if (br != null) {
                     try {
                         br.close();
                     } catch (IOException e) {
@@ -424,12 +481,12 @@ public class DetailActivityFragment extends Fragment {
             return null;
         }
 
-        public List<Review> getReviewsFromJsonString(String jsonString){
+        public List<Review> getReviewsFromJsonString(String jsonString) {
             final List<Review> reviewList = new ArrayList<>();
-            try{
+            try {
                 JSONObject jsonObject = new JSONObject(jsonString);
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
-                for(int i = 0; i<jsonArray.length(); i++){
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject reviewObj = jsonArray.getJSONObject(i);
                     Review review = new Review();
                     review.setId(reviewObj.getString(Constants.REVIEW_ID_KEY));
@@ -448,11 +505,11 @@ public class DetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Review> reviews) {
-            if(reviews != null && reviews.size()>0){
+            if (reviews != null && reviews.size() > 0) {
                 TextView contentView;
-                for(int i=0; i<reviews.size();i++){
-                    View review_item = mInflator.inflate(R.layout.review_item,null);
-                    contentView =  (TextView)review_item.findViewById(R.id.review_content);
+                for (int i = 0; i < reviews.size(); i++) {
+                    View review_item = mInflator.inflate(R.layout.review_item, null);
+                    contentView = (TextView) review_item.findViewById(R.id.review_content);
                     contentView.setText(reviews.get(i).getContent());
                     mReviewLayout.addView(review_item);
                 }

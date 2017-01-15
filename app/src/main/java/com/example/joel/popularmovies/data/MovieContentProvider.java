@@ -51,6 +51,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
 
         int match = sUriMatcher.match(uri);
         Cursor retCursor;
+        String id;
         switch (match){
 
             case MOVIES:
@@ -66,11 +67,16 @@ public class MovieContentProvider extends android.content.ContentProvider {
                 break;
 
             case MOVIES_ID:
+                //get the ID that was passed in
+                id = String.valueOf(ContentUris.parseId(uri));
+                //create the selection statement
+                final String movieSelection = PopularMoviesContract.MovieEntry.TABLE_NAME +
+                        "." + PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ";
                 retCursor =  dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.MovieEntry.TABLE_NAME,
                         projection,
-                        selection,
-                        selectionArgs,
+                        movieSelection,
+                        new String[]{id},
                         null,
                         null,
                         sortOrder
@@ -91,10 +97,10 @@ public class MovieContentProvider extends android.content.ContentProvider {
 
             case FAVOURITES_ID:
                 //get the ID that was passed in
-                String id = String.valueOf(ContentUris.parseId(uri));
+                id = String.valueOf(ContentUris.parseId(uri));
                 //create the selection statement
                 final String favWithIDSelection = PopularMoviesContract.FavouriteEntry.TABLE_NAME +
-                        "." + PopularMoviesContract.FavouriteEntry._ID + " = ? ";
+                        "." + PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ";
                 //return the cursor
                 retCursor =  dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,

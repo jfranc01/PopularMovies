@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
 
     public static boolean mTwoPane;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
-    private String mCategory;
+    public String mCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,9 +70,9 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
     }
 
     @Override
-    public void onItemClicked(Movie movie) {
+    public void onItemClicked(Uri uri) {
         Bundle arguments = new Bundle();
-        arguments.putParcelable(DetailActivityFragment.DETAIL_MOVIE, movie);
+        arguments.putParcelable(DetailActivityFragment.DETAIL_URI, uri);
         //if it is two pane
         if (mTwoPane) {
             DetailActivityFragment daf = new DetailActivityFragment();
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
                     daf, DETAILFRAGMENT_TAG).commit();
         } else {
             Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra(DetailActivityFragment.DETAIL_MOVIE, movie);
+            intent.setData(uri);
             startActivity(intent);
         }
     }

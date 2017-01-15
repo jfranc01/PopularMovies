@@ -150,10 +150,24 @@ public class MainActivityFragment extends Fragment
         mGridView.setAdapter(mCursorAdapter);
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie = (Movie) parent.getItemAtPosition(position);
-                //call the call back interface's implementation
-                ((DetailActivityFragment.Callbacks) getActivity()).onItemClicked(movie);
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Cursor cursor = (Cursor)adapterView.getItemAtPosition(position);
+                Uri contentUri;
+                if(cursor != null){
+                    //first find out what the current category is
+                    String category = Utility.getCurrentCategory(getActivity());
+                    if(category.equals("Favourites")){
+                        contentUri = PopularMoviesContract.FavouriteEntry
+                                .buildPopularMoviesUri(cursor.getLong(COL_FAV_MOVIE_ID));
+                    }
+                    else{
+                        contentUri = PopularMoviesContract.MovieEntry
+                                .buildPopularMoviesUri(cursor.getLong(COL_FAV_MOVIE_ID));
+                    }
+
+                    //call the call back interface's implementation
+                    ((DetailActivityFragment.Callbacks) getActivity()).onItemClicked(contentUri);
+                }
             }
         });
 
@@ -228,8 +242,6 @@ public class MainActivityFragment extends Fragment
             } else {
                 ADD_ON_SEGMENT = Constants.ADD_ON_RATING_SEGMENT;
             }
-
-
             try {
 
                 Uri builtUri = Uri.parse(Constants.BASE_URL).buildUpon()

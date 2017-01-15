@@ -47,7 +47,7 @@ public class PopularMoviesContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static String getTitleFromUri(Uri uri) {
+        public static String getMovieIDFromUri(Uri uri) {
             return uri.getPathSegments().get(1);
         }
 
@@ -77,10 +77,6 @@ public class PopularMoviesContract {
 
         public static Uri buildPopularMoviesUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
-
-        public static String getTitleFromUri(Uri uri) {
-            return uri.getPathSegments().get(1);
         }
     }
 
