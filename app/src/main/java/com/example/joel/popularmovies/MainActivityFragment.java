@@ -46,7 +46,7 @@ import java.util.Vector;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener{
+        implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static GridView mGridView;
     public final String LOG_TAG = getClass().getSimpleName();
@@ -56,8 +56,6 @@ public class MainActivityFragment extends Fragment
     private MovieAdapter mMovieAdapter;
     private List<Movie> mCurrentMovieList;
     private String mCurrentSortOrder;
-
-    private android.os.Handler perfromClick = new android.os.Handler();
 
 
     public MainActivityFragment() {
@@ -82,17 +80,24 @@ public class MainActivityFragment extends Fragment
             startActivity(new Intent(getActivity(), SettingsActivity.class));
             return true;
         }
-        if(id == R.id.action_refresh){
+        if (id == R.id.action_refresh) {
             //here we call the FetchMovies task
-            String category = Utility.getCurrentCategory(getActivity());
-            FetchMovieList moviesTask = new FetchMovieList();
-            moviesTask.execute(category);
+            fetchMovies();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    public void fetchMovies() {
+        String category = Utility.getCurrentCategory(getActivity());
+        FetchMovieList moviesTask = new FetchMovieList();
+        moviesTask.execute(category);
+    }
+
+    public void fetchFavourites() {
+        getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
+    }
 
 
     //projection columns
@@ -114,42 +119,9 @@ public class MainActivityFragment extends Fragment
     public static final int COL_FAV_RATING = 5;
     public static final int COL_FAV_IMGURL = 6;
 
-
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        //Read from the shared preferences and pass the value appropriately
-//        SharedPreferences sharedPrefs = PreferenceManager
-//                .getDefaultSharedPreferences(getActivity());
-//
-//        //set the preference change listener
-//        sharedPrefs.registerOnSharedPreferenceChangeListener(this);
-//        //get the key and also set the default value
-//        mCurrentSortOrder = sharedPrefs.getString(getString(R.string.sort_order_key),
-//                getString(R.string.sort_order_default));
-//
-//        mCurrentMovieList = new ArrayList();
-//        if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
-//            //here we use a AsyncTaskLoader to load items form the database
-//            getLoaderManager().initLoader(FAVOURTIES_LOADER,null, this);
-//        }
-//        else{
-//            FetchMovieList fetchMovieList = new FetchMovieList();
-//            //pass the value of the key to the task
-//            fetchMovieList.execute(mCurrentSortOrder);
-//        }
-//
-//    }
-
     @Override
     public void onResume() {
         super.onResume();
-        //if(mCurrentSortOrder.equalsIgnoreCase("Favourites")){
-        //    getLoaderManager().restartLoader(FAVOURTIES_LOADER, null, this);
-        //}else{
-        //    getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
-        //}
-
     }
 
     @Override
@@ -158,11 +130,11 @@ public class MainActivityFragment extends Fragment
         //but we need to know what the current category was set to
         String category = Utility.getCurrentCategory(getActivity());
         //if it is the favourites read from the favourites table
-        if(category.equals("Favourites")){
+        if (category.equals("Favourites")) {
             getLoaderManager().initLoader(FAVOURTIES_LOADER, null, this);
         }
         //otherwise just read from the movies db
-        else{
+        else {
             getLoaderManager().initLoader(MOVIES_LOADER, null, this);
         }
         super.onActivityCreated(savedInstanceState);
@@ -171,6 +143,7 @@ public class MainActivityFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mCurrentSortOrder = Utility.getCurrentCategory(getActivity());
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         mCursorAdapter = new CursorAdaptor(getContext(), null, 0);
         mGridView = (GridView) rootView.findViewById(R.id.flavours_grid);
@@ -178,9 +151,9 @@ public class MainActivityFragment extends Fragment
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie = (Movie)parent.getItemAtPosition(position);
+                Movie movie = (Movie) parent.getItemAtPosition(position);
                 //call the call back interface's implementation
-                ((DetailActivityFragment.Callbacks)getActivity()).onItemClicked(movie);
+                ((DetailActivityFragment.Callbacks) getActivity()).onItemClicked(movie);
             }
         });
 
@@ -193,7 +166,7 @@ public class MainActivityFragment extends Fragment
 
         //depending on the loadet id, we query either the movies tables
         //or the favourites table
-        if(FAVOURTIES_LOADER == id) {
+        if (FAVOURTIES_LOADER == id) {
 
             return new CursorLoader(
                     getActivity(),
@@ -219,60 +192,6 @@ public class MainActivityFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-
-//        int id = loader.getId();
-//        if(MOVIES_LOADER == id){
-//            mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
-//            List<Movie> favList = new ArrayList();
-//            if(data != null && data.moveToFirst()){
-//                do{
-//                    Movie movie = new Movie();
-//                    //movie.setmId(data.getString(COL_FAV_ID));
-//                    movie.setmMovieID(data.getString(COL_FAV_MOVIE_ID));
-//                    movie.setmTtile(data.getString(COL_FAV_TITLE));//title
-//                    movie.setmSynopsis(data.getString(COL_FAV_SYNOPSIS)); //synopsis
-//                    movie.setmReleaseDate(data.getString(COL_FAV_RELEASE)); //release
-//                    movie.setmRating(data.getString(COL_FAV_RATING)); //rating
-//                    movie.setmImageUrl(data.getString(COL_FAV_IMGURL)); //img url
-//                    movie.setmIsFav(true); //is it a favourite
-//                    favList.add(movie);
-//                }while(data.moveToNext());
-//            }
-//            mCurrentMovieList = favList;
-//            mGridView.setAdapter(mMovieAdapter);
-//        }
-//        else{
-//            mCursorAdapter = new CursorAdaptor(getContext(), null, 0);
-//            mCursorAdapter.swapCursor(data);
-//        }
-//        //iterate over the cursor and create a list of movies
-//        List<Movie> favList = new ArrayList();
-//        if(data != null && data.moveToFirst()){
-//            do{
-//                Movie movie = new Movie();
-//                //movie.setmId(data.getString(COL_FAV_ID));
-//                movie.setmMovieID(data.getString(COL_FAV_MOVIE_ID));
-//                movie.setmTtile(data.getString(COL_FAV_TITLE));//title
-//                movie.setmSynopsis(data.getString(COL_FAV_SYNOPSIS)); //synopsis
-//                movie.setmReleaseDate(data.getString(COL_FAV_RELEASE)); //release
-//                movie.setmRating(data.getString(COL_FAV_RATING)); //rating
-//                movie.setmImageUrl(data.getString(COL_FAV_IMGURL)); //img url
-//                movie.setmIsFav(true); //is it a favourite
-//                favList.add(movie);
-//            }while(data.moveToNext());
-//        }
-//        //save it to the global movie list
-//        mCurrentMovieList = favList;
-//        mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
-//        mGridView.setAdapter(mMovieAdapter);
-//        mGridView.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if(MainActivity.mTwoPane) {
-//                    mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
-//                }
-//            }
-//        });
     }
 
     @Override
@@ -290,7 +209,7 @@ public class MainActivityFragment extends Fragment
     /**
      * This class will retrieve the list of movies
      */
-    public class FetchMovieList extends AsyncTask<String, String, List<Movie>>{
+    public class FetchMovieList extends AsyncTask<String, String, List<Movie>> {
 
         private final String LOG_TAG = FetchMovieList.class.getSimpleName();
 
@@ -299,20 +218,19 @@ public class MainActivityFragment extends Fragment
         protected List<Movie> doInBackground(String... params) {
 
             String ADD_ON_SEGMENT = "";
-            String jsonMovieString =  null;
-            HttpURLConnection httpURLConnection =  null;
+            String jsonMovieString = null;
+            HttpURLConnection httpURLConnection = null;
             InputStreamReader isr = null;
             BufferedReader br = null;
 
-            if(params[0].equalsIgnoreCase(getString(R.string.sort_order_choice_popularity_value))){
+            if (params[0].equalsIgnoreCase(getString(R.string.sort_order_choice_popularity_value))) {
                 ADD_ON_SEGMENT = Constants.ADD_ON_POPULAR_SEGMENT;
-            }
-            else{
+            } else {
                 ADD_ON_SEGMENT = Constants.ADD_ON_RATING_SEGMENT;
             }
 
 
-            try{
+            try {
 
                 Uri builtUri = Uri.parse(Constants.BASE_URL).buildUpon()
                         .appendEncodedPath(ADD_ON_SEGMENT)
@@ -332,7 +250,7 @@ public class MainActivityFragment extends Fragment
                 //Create an InputStream reader;
                 isr = new InputStreamReader(httpURLConnection.getInputStream());
 
-                if(isr == null){
+                if (isr == null) {
                     return null;
                 }
 
@@ -342,16 +260,16 @@ public class MainActivityFragment extends Fragment
                 br = new BufferedReader(isr);
                 //variable to hold the content of the line being read
                 String line;
-                while((line  = br.readLine()) != null){
+                while ((line = br.readLine()) != null) {
                     buffer.append(line + "\n");
                 }
 
-                if(buffer.length() == 0){
+                if (buffer.length() == 0) {
                     return null;
                 }
 
-                jsonMovieString =  buffer.toString();
-                Log.i(LOG_TAG,  " Content: " + jsonMovieString);
+                jsonMovieString = buffer.toString();
+                Log.i(LOG_TAG, " Content: " + jsonMovieString);
 
                 //here we need to parse the json object to fetch the
                 //data that we need
@@ -361,13 +279,13 @@ public class MainActivityFragment extends Fragment
                 Log.e(LOG_TAG, " Error: " + e.getMessage());
             } catch (IOException e) {
                 Log.e(LOG_TAG, " Error: " + e.getMessage());
-            }finally {
-                if(httpURLConnection != null){
+            } finally {
+                if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
                 }
 
-                if(br !=  null){
-                    try{
+                if (br != null) {
+                    try {
                         br.close();
                     } catch (IOException e) {
                         Log.e(LOG_TAG, " Cannot close stream reader: " + e.getMessage());
@@ -381,26 +299,28 @@ public class MainActivityFragment extends Fragment
         /**
          * Method that wil parse the json object and return a list
          * of Movie objects
+         *
          * @param jsonMovieString
          * @return ArrayList<Movie>
          */
         private List<Movie> getMovieDataFromJsonString(String jsonMovieString) {
 
-            final ArrayList<Movie>  movieList = new ArrayList<>();
+            final ArrayList<Movie> movieList = new ArrayList<>();
             Vector<ContentValues> cVVector;
             try {
                 JSONObject jsonObj = new JSONObject(jsonMovieString);
-                JSONArray  jsonArray = jsonObj.getJSONArray("results");
+                JSONArray jsonArray = jsonObj.getJSONArray("results");
                 cVVector = new Vector<ContentValues>(jsonArray.length());
 
-                for(int i = 0; i<jsonArray.length(); i++ ){
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject movieObject = jsonArray.getJSONObject(i);
-                    ContentValues moviewValues =  Utility.createMovieContentValuesFromJSON(movieObject);
+                    ContentValues moviewValues =
+                            Utility.createMovieContentValuesFromJSON(movieObject);
                     cVVector.add(moviewValues);
                 }
                 int inserted = 0;
                 // add to database
-                if ( cVVector.size() > 0 ) {
+                if (cVVector.size() > 0) {
                     ContentValues[] cvArray = new ContentValues[cVVector.size()];
                     cVVector.toArray(cvArray);
                     inserted = getActivity().getContentResolver().
@@ -416,19 +336,5 @@ public class MainActivityFragment extends Fragment
 
             return null;
         }
-
-       /* @Override
-        protected void onPostExecute(List<Movie> movies) {
-            //save it to the global variable!
-            mCurrentMovieList =  movies;
-            //initialize the adapter
-            mMovieAdapter = new MovieAdapter(getActivity(), mCurrentMovieList);
-            //set the adapter
-            mGridView.setAdapter(mMovieAdapter);
-
-            if(MainActivity.mTwoPane){
-                mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
-            }
-        }*/
     }
 }

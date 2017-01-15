@@ -26,22 +26,24 @@ public class Utility {
 
     final static String LOG_TAG = Utility.class.getSimpleName();
     final static String DATE_FORMAT = "yyyy-mm-dd";
+
     /**
      * Method will take in a date string and pass only the
      * YEAR back as a String
+     *
      * @param dateString
      * @return
      */
-    public static String formatDate (String dateString){
+    public static String formatDate(String dateString) {
         String expectedPattern = DATE_FORMAT;
         SimpleDateFormat formatter = new SimpleDateFormat(expectedPattern);
         try {
             Date date = formatter.parse(dateString);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
-            return(String.valueOf(cal.get(Calendar.YEAR)));
+            return (String.valueOf(cal.get(Calendar.YEAR)));
         } catch (ParseException e) {
-            Log.e(LOG_TAG, "Error parsing the date " + e.getMessage() );
+            Log.e(LOG_TAG, "Error parsing the date " + e.getMessage());
         }
         return null;
     }
@@ -50,11 +52,12 @@ public class Utility {
      * This method will create a ContentValues object
      * based on the Movie object that is passed in to the
      * database
+     *
      * @param movie
      * @return
      */
-    public static ContentValues createFavContentValues(Movie movie){
-        ContentValues cv  = new ContentValues();
+    public static ContentValues createFavContentValues(Movie movie) {
+        ContentValues cv = new ContentValues();
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_TITLE, movie.getmTtile());
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_SYNOPSIS, movie.getmSynopsis());
         cv.put(PopularMoviesContract.FavouriteEntry.COLUMN_NAME_RELEASE, movie.getmReleaseDate());
@@ -66,11 +69,13 @@ public class Utility {
 
     /**
      * Method will create ContentValues by passing in a JSONObject
+     *
      * @param movieObject
      * @return
      * @throws JSONException
      */
-    public static ContentValues createMovieContentValuesFromJSON(JSONObject movieObject ) throws JSONException {
+    public static ContentValues createMovieContentValuesFromJSON(JSONObject movieObject)
+            throws JSONException {
         ContentValues movieValues = new ContentValues();
         movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_TITLE,
                 movieObject.getString(Constants.TITLE_KEY));
@@ -83,7 +88,8 @@ public class Utility {
         Uri builtUri = Uri.parse(Constants.BASE_IMAGE_URL).buildUpon()
                 .appendEncodedPath(movieObject.getString(Constants.IMAGE_URL_KEY)).build();
         movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_NAME_IMGURL, builtUri.toString());
-        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID, movieObject.getString(Constants.ID));
+        movieValues.put(PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID,
+                movieObject.getString(Constants.ID));
 
         return movieValues;
     }
@@ -92,10 +98,11 @@ public class Utility {
      * Method will return the default category of the movie choice
      * by retrieving the shared Preferences. If one hasn't been set then
      * the default gets saved!
+     *
      * @param context
      * @return
      */
-    public static String getCurrentCategory(Context context ){
+    public static String getCurrentCategory(Context context) {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
 

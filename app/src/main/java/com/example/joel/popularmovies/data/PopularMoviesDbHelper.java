@@ -13,7 +13,7 @@ public class PopularMoviesDbHelper extends SQLiteOpenHelper {
     public static int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "popularmovies.db";
 
-    public PopularMoviesDbHelper(Context context){
+    public PopularMoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
