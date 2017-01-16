@@ -93,7 +93,7 @@ public class MainActivityFragment extends Fragment
         String category = Utility.getCurrentCategory(getActivity());
         FetchMovieList moviesTask = new FetchMovieList();
         moviesTask.execute(category);
-        getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
+        //getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
     }
 
     public void fetchFavourites() {
@@ -210,7 +210,9 @@ public class MainActivityFragment extends Fragment
         mGridView.post(new Runnable() {
             @Override
             public void run() {
-               // mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+                if(mGridView.getAdapter() != null) {
+                    mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+                }
             }
         });
     }
@@ -354,6 +356,12 @@ public class MainActivityFragment extends Fragment
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(List<Movie> movies) {
+            super.onPostExecute(movies);
+            getLoaderManager().restartLoader(MOVIES_LOADER, null, MainActivityFragment.this);
         }
     }
 }
