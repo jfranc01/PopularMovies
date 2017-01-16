@@ -207,6 +207,12 @@ public class MainActivityFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
+        mGridView.post(new Runnable() {
+            @Override
+            public void run() {
+               // mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
+            }
+        });
     }
 
     @Override

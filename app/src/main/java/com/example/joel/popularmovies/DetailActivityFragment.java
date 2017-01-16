@@ -182,7 +182,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                 }
             }
         });
-        if(mMovie !=null) {
+        if(mMovieID !=null) {
             //here we query the movie and see if it is a favourite and set the star logo
             Cursor returnCursor = getContext().getContentResolver().
                     query(
