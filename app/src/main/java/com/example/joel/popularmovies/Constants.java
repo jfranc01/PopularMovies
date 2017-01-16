@@ -6,31 +6,31 @@ package com.example.joel.popularmovies;
 
 public class Constants {
 
-    final static String BASE_URL = "http://api.themoviedb.org/3/movie";
-    final static String ADD_ON_POPULAR_SEGMENT = "popular";
-    final static String ADD_ON_RATING_SEGMENT = "top_rated";
-    final static String ADD_ON_VIDEOS_SEGMENT = "videos";
-    final static String ADD_ON_REVIEWS_SEGMENT = "reviews";
-    final static String API_KEY_PARAM= "api_key";
+    public final static String BASE_URL = "http://api.themoviedb.org/3/movie";
+    public final static String ADD_ON_POPULAR_SEGMENT = "popular";
+    public final static String ADD_ON_RATING_SEGMENT = "top_rated";
+    public final static String ADD_ON_VIDEOS_SEGMENT = "videos";
+    public final static String ADD_ON_REVIEWS_SEGMENT = "reviews";
+    public final static String API_KEY_PARAM= "api_key";
 
-    final static String TITLE_KEY = "original_title";
-    final static String SYNOPSIS_KEY= "overview";
-    final static String RELEASE_DATE_KEY = "release_date";
-    final static String RATING_KEY = "vote_average";
-    final static String IMAGE_URL_KEY = "poster_path";
-    final static String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
-    final static String ID = "id";
+    public final static String TITLE_KEY = "original_title";
+    public final static String SYNOPSIS_KEY= "overview";
+    public final static String RELEASE_DATE_KEY = "release_date";
+    public final static String RATING_KEY = "vote_average";
+    public final static String IMAGE_URL_KEY = "poster_path";
+    public final static String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
+    public final static String ID = "id";
 
-    final static String TRAILER_ID_KEY = "id";
-    final static String TRAILER_KEY = "key";
-    final static String TRAILER_NAME_KEY = "name";
-    final static String TRAILER_SITE_KEY = "site";
+    public final static String TRAILER_ID_KEY = "id";
+    public final static String TRAILER_KEY = "key";
+    public final static String TRAILER_NAME_KEY = "name";
+    public final static String TRAILER_SITE_KEY = "site";
 
-    final static String REVIEW_ID_KEY = "id";
-    final static String REVIEW_AUTHOR_KEY = "author";
-    final static String REVIEW_CONTENT_KEY = "content";
-    final static String REVIEW_URL_KEY = "url";
+    public final static String REVIEW_ID_KEY = "id";
+    public final static String REVIEW_AUTHOR_KEY = "author";
+    public final static String REVIEW_CONTENT_KEY = "content";
+    public final static String REVIEW_URL_KEY = "url";
 
-    final static String YOUTBE_BASE_URI = "http://www.youtube.com/watch?v";
-    final static String YOUTUBE_PARAM_V = "v";
+    public final static String YOUTBE_BASE_URI = "http://www.youtube.com/watch?v";
+    public final static String YOUTUBE_PARAM_V = "v";
 }

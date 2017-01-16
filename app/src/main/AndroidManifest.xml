@@ -43,6 +43,7 @@
             android:authorities="com.example.joel.popularmovies"
             android:name=".data.MovieContentProvider"
             android:exported="false"/>
+        <service android:name=".service.MovieService" />
+        <receiver android:name=".service.MovieService$AlarmReceiver"/>
     </application>
-
 </manifest>
