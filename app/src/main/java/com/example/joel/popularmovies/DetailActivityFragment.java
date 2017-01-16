@@ -182,18 +182,20 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
                 }
             }
         });
-        //here we query the movie and see if it is a favourite and set the star logo
-        Cursor returnCursor = getContext().getContentResolver().
-                query(
-                        PopularMoviesContract.FavouriteEntry.CONTENT_URI,
-                        MainActivityFragment.FAVOURITE_COLUMNS,
-                        PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ",
-                        new String[]{mMovieID},
-                        null);
-        if (returnCursor != null && returnCursor.moveToFirst()) {
-            if (returnCursor.getString(COL_MOVIE_ID)
-                    .equalsIgnoreCase(mMovieID)) {
-                startButton.setBackgroundResource(R.drawable.on__star);
+        if(mMovie !=null) {
+            //here we query the movie and see if it is a favourite and set the star logo
+            Cursor returnCursor = getContext().getContentResolver().
+                    query(
+                            PopularMoviesContract.FavouriteEntry.CONTENT_URI,
+                            MainActivityFragment.FAVOURITE_COLUMNS,
+                            PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ",
+                            new String[]{mMovieID},
+                            null);
+            if (returnCursor != null && returnCursor.moveToFirst()) {
+                if (returnCursor.getString(COL_MOVIE_ID)
+                        .equalsIgnoreCase(mMovieID)) {
+                    startButton.setBackgroundResource(R.drawable.on__star);
+                }
             }
         }
 
