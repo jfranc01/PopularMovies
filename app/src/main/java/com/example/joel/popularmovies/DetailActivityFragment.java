@@ -154,7 +154,7 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             @Override
             public void onClick(View v) {
                 Log.i(LOG_TAG, "Star button was pressed");
-                if (mMovieID != null){
+                if (mMovieID != null) {
                     //first check if this movie is already a favourite
                     Cursor returnCursor = getContext().getContentResolver().
                             query(

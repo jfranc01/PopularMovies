@@ -26,12 +26,12 @@ public class MovieContentProvider extends android.content.ContentProvider {
 
     private PopularMoviesDbHelper dbHelpher;
 
-    static UriMatcher buildUriMatcher(){
+    static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = PopularMoviesContract.CONTENT_AUTHORITY.toString();
-        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES, 100 );
-        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/#" , 101);
-        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/*" , 102);
+        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES, 100);
+        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/#", 101);
+        matcher.addURI(authority, PopularMoviesContract.PATH_FAVOURITES + "/*", 102);
         matcher.addURI(authority, PopularMoviesContract.PATH_MOVIES, 200);
         matcher.addURI(authority, PopularMoviesContract.PATH_MOVIES + "/#", 201);
 
@@ -52,7 +52,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
         int match = sUriMatcher.match(uri);
         Cursor retCursor;
         String id;
-        switch (match){
+        switch (match) {
 
             case MOVIES:
                 retCursor = dbHelpher.getReadableDatabase().query(
@@ -72,7 +72,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
                 //create the selection statement
                 final String movieSelection = PopularMoviesContract.MovieEntry.TABLE_NAME +
                         "." + PopularMoviesContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ";
-                retCursor =  dbHelpher.getReadableDatabase().query(
+                retCursor = dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.MovieEntry.TABLE_NAME,
                         projection,
                         movieSelection,
@@ -102,7 +102,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
                 final String favWithIDSelection = PopularMoviesContract.FavouriteEntry.TABLE_NAME +
                         "." + PopularMoviesContract.FavouriteEntry.COLUMN_MOVIE_ID + " = ? ";
                 //return the cursor
-                retCursor =  dbHelpher.getReadableDatabase().query(
+                retCursor = dbHelpher.getReadableDatabase().query(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,
                         projection,
                         favWithIDSelection,
@@ -111,7 +111,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
                         null,
                         sortOrder
                 );
-            break;
+                break;
 
             case FAVOURITES_TITLE:
                 retCursor = dbHelpher.getReadableDatabase()
@@ -125,7 +125,8 @@ public class MovieContentProvider extends android.content.ContentProvider {
                                 sortOrder
                         );
                 break;
-            default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
+            default:
+                throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
@@ -140,29 +141,30 @@ public class MovieContentProvider extends android.content.ContentProvider {
      */
     public String getType(Uri uri) {
         int match = sUriMatcher.match(uri);
-        switch(match){
+        switch (match) {
             case FAVOURITES: {
-                return  PopularMoviesContract.FavouriteEntry.CONTENT_TYPE;
+                return PopularMoviesContract.FavouriteEntry.CONTENT_TYPE;
 
             }
 
             case FAVOURITES_ID: {
-                return  PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
+                return PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
             }
 
             case FAVOURITES_TITLE: {
                 return PopularMoviesContract.FavouriteEntry.CONTENT_TYPE_ITEM;
             }
 
-            case MOVIES:{
+            case MOVIES: {
                 return PopularMoviesContract.MovieEntry.CONTENT_TYPE;
             }
 
-            case MOVIES_ID:{
+            case MOVIES_ID: {
                 return PopularMoviesContract.MovieEntry.CONTENT_TYPE_ITEM;
             }
 
-            default: throw new UnsupportedOperationException("Unknown Uri: " + uri);
+            default:
+                throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
 
     }
@@ -172,31 +174,29 @@ public class MovieContentProvider extends android.content.ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         int match = sUriMatcher.match(uri);
         Uri returnUri;
-        switch (match){
-            case FAVOURITES : {
+        switch (match) {
+            case FAVOURITES: {
                 long _id = dbHelpher.getWritableDatabase().insert(
                         PopularMoviesContract.FavouriteEntry.TABLE_NAME,
                         null,
                         values
-                        );
-                if(_id>0){
+                );
+                if (_id > 0) {
                     returnUri = PopularMoviesContract.FavouriteEntry.buildPopularMoviesUri(_id);
-                }
-                else{
+                } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
                 break;
             }
-            case MOVIES:{
+            case MOVIES: {
                 long _id = dbHelpher.getWritableDatabase().insert(
                         PopularMoviesContract.MovieEntry.TABLE_NAME,
                         null,
                         values
                 );
-                if(_id>0){
+                if (_id > 0) {
                     returnUri = PopularMoviesContract.MovieEntry.buildPopularMoviesUri(_id);
-                }
-                else{
+                } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
                 break;
@@ -215,16 +215,16 @@ public class MovieContentProvider extends android.content.ContentProvider {
         int match = sUriMatcher.match(uri);
         int rowsDeleted;
 
-        switch(match){
-            case FAVOURITES:{
-                rowsDeleted =  dbHelpher.getWritableDatabase()
+        switch (match) {
+            case FAVOURITES: {
+                rowsDeleted = dbHelpher.getWritableDatabase()
                         .delete(PopularMoviesContract.FavouriteEntry.TABLE_NAME,
-                        selection, selectionArgs);
+                                selection, selectionArgs);
                 break;
             }
 
-            case MOVIES:{
-                rowsDeleted =  dbHelpher.getWritableDatabase()
+            case MOVIES: {
+                rowsDeleted = dbHelpher.getWritableDatabase()
                         .delete(PopularMoviesContract.MovieEntry.TABLE_NAME,
                                 selection, selectionArgs);
                 break;
@@ -232,7 +232,7 @@ public class MovieContentProvider extends android.content.ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
         }
-        if(rowsDeleted != 0) {
+        if (rowsDeleted != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsDeleted;
@@ -248,13 +248,14 @@ public class MovieContentProvider extends android.content.ContentProvider {
         final SQLiteDatabase db = dbHelpher.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
 
-        switch (match){
-            case MOVIES:{
+        switch (match) {
+            case MOVIES: {
                 db.beginTransaction();
                 int returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(PopularMoviesContract.MovieEntry.TABLE_NAME, null, value);
+                        long _id = db.insert(PopularMoviesContract.MovieEntry.TABLE_NAME,
+                                null, value);
                         if (_id != -1) {
                             returnCount++;
                         }
