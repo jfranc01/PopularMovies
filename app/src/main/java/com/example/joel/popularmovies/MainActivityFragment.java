@@ -93,6 +93,7 @@ public class MainActivityFragment extends Fragment
         String category = Utility.getCurrentCategory(getActivity());
         FetchMovieList moviesTask = new FetchMovieList();
         moviesTask.execute(category);
+        getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
     }
 
     public void fetchFavourites() {

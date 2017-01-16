@@ -261,7 +261,6 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        //do nothing
     }
 
     private Intent createShareForecastIntent() {
