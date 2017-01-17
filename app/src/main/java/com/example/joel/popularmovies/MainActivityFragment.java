@@ -32,6 +32,7 @@ import com.example.joel.popularmovies.adapters.MovieAdapter;
 import com.example.joel.popularmovies.data.PopularMoviesContract;
 import com.example.joel.popularmovies.model.Movie;
 import com.example.joel.popularmovies.service.MovieService;
+import com.example.joel.popularmovies.sync.MovieSyncAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,22 +97,23 @@ public class MainActivityFragment extends Fragment
 
     public void fetchMovies() {
 
-        String category = Utility.getCurrentCategory(getActivity());
-        Intent alarmIntent = new Intent(getActivity(),
-                MovieService.AlarmReceiver.class);
-        alarmIntent.putExtra(MovieService.CATEGORY_QUERY, category);
-
-        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,
-                alarmIntent, PendingIntent.FLAG_ONE_SHOT);
-
-        AlarmManager alarmManager = (AlarmManager)
-                getActivity().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000 , pi);
-        Intent movieService = new Intent(getActivity(), MovieService.class);
-        movieService.putExtra(MovieService.CATEGORY_QUERY, category);
+//        String category = Utility.getCurrentCategory(getActivity());
+//        Intent alarmIntent = new Intent(getActivity(),
+//                MovieService.AlarmReceiver.class);
+//        alarmIntent.putExtra(MovieService.CATEGORY_QUERY, category);
+//
+//        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,
+//                alarmIntent, PendingIntent.FLAG_ONE_SHOT);
+//
+//        AlarmManager alarmManager = (AlarmManager)
+//                getActivity().getSystemService(Context.ALARM_SERVICE);
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000 , pi);
+//        Intent movieService = new Intent(getActivity(), MovieService.class);
+//        movieService.putExtra(MovieService.CATEGORY_QUERY, category);
         //getLoaderManager().restartLoader(MOVIES_LOADER, null, MainActivityFragment.this);
         //FetchMovieList moviesTask = new FetchMovieList();
         //moviesTask.execute(category);
+        MovieSyncAdapter.syncImmediately(getActivity());
     }
 
     public void fetchFavourites() {

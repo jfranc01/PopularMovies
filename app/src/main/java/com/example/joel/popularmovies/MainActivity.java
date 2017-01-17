@@ -13,6 +13,7 @@ import android.view.MenuItem;
 
 import com.example.joel.popularmovies.data.PopularMoviesContract;
 import com.example.joel.popularmovies.model.Movie;
+import com.example.joel.popularmovies.sync.MovieSyncAdapter;
 
 public class MainActivity extends AppCompatActivity implements DetailActivityFragment.Callbacks {
 
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements DetailActivityFra
         } else {
             mTwoPane = false;
         }
+        MovieSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override

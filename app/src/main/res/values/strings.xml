@@ -16,4 +16,7 @@
     <string name="review_title">Reviews</string>
     <string name="action_share">Share</string>
     <string name="action_refresh">Refresh</string>
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">com.example.joel.popularmovies</string>
+    <string name="content_authority">com.example.joel.popularmovies</string>
 </resources>
