@@ -207,6 +207,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                         Utility.createMovieContentValuesFromJSON(movieObject);
                 cVVector.add(moviewValues);
             }
+
+            //delete the older movies
+            mContentResolver.delete(PopularMoviesContract.MovieEntry.CONTENT_URI,
+                    null, null);
             int inserted = 0;
             // add to database
             if (cVVector.size() > 0) {
