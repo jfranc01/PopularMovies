@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -37,6 +38,8 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,6 +48,9 @@ import java.util.List;
 import java.util.Vector;
 
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static com.example.joel.popularmovies.sync.MovieSyncAdapter.MOVIE_SERVER_DOWN;
+import static com.example.joel.popularmovies.sync.MovieSyncAdapter.MOVIE_SERVER_INVALID;
+import static com.example.joel.popularmovies.sync.MovieSyncAdapter.MOVIE_SERVER_OK;
 
 /**
  * Created by joel on 2017-01-16.
@@ -60,6 +66,15 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     //Variable to hold the content resolver instance
     ContentResolver mContentResolver;
+
+    public static final int MOVIE_SERVER_OK = 1;
+    public static final int MOVIE_SERVER_INVALID = 2;
+    public static final int MOVIE_SERVER_DOWN = 3;
+    public static final int MOVIE_UNKNOWN_ERROR = 4;
+
+    @IntDef({MOVIE_SERVER_OK, MOVIE_SERVER_INVALID, MOVIE_SERVER_DOWN, MOVIE_UNKNOWN_ERROR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ServerStatus{}
 
     //Constructor
     MovieSyncAdapter(Context context, boolean autoInitialize){
@@ -153,6 +168,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             if (buffer.length() == 0) {
+                setServerStatus(getContext(), MOVIE_SERVER_DOWN);
                 return;
             }
 
@@ -165,8 +181,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, " Error: " + e.getMessage());
+            setServerStatus(getContext(), MOVIE_SERVER_INVALID);
         } catch (IOException e) {
             Log.e(LOG_TAG, " Error: " + e.getMessage());
+            setServerStatus(getContext(), MOVIE_SERVER_DOWN);
         } finally {
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
@@ -222,9 +240,11 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Log.d(LOG_TAG, "FetchMovieTask Complete. " + inserted + " Inserted");
+            setServerStatus(getContext(), MOVIE_SERVER_OK);
             //return the list of movies
             return movieList;
         } catch (JSONException e) {
+            setServerStatus(getContext(), MOVIE_SERVER_INVALID);
             Log.e(LOG_TAG, "Error creating JSON Object: " + e.getMessage());
         }
 
@@ -354,5 +374,17 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 editor.commit();
             }
         }
+    }
+
+    /**
+     * Method will store the current status as a shared preference
+     * @param context
+     * @param serverStatus
+     */
+    static private void setServerStatus(Context context, @ServerStatus int serverStatus){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor spe = sp.edit();
+        spe.putInt(context.getString(R.string.pref_server_status_key), serverStatus);
+        spe.commit();
     }
 }

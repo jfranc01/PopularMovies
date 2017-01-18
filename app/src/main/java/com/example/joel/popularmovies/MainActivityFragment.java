@@ -144,7 +144,16 @@ public class MainActivityFragment extends Fragment
 
     @Override
     public void onResume() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.registerOnSharedPreferenceChangeListener(this);
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
     }
 
     @Override
@@ -228,20 +237,8 @@ public class MainActivityFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-        //get the count
-        if (data.getCount() == 0) {
-            View viewParent = (View) getView().getParent();
-            AppCompatTextView tv = (AppCompatTextView) viewParent.findViewById(R.id.empty_movie_list);
-            if (tv != null) {
-                mGridView.setEmptyView(tv);
-                int message = R.string.empty_movie_list;
-                if (!Utility.isNetworkConnected(getActivity())) {
-                    {
-                        message = R.string.empty_movie_list_due_to_network;
-                    }
-                }
-                tv.setText(message);
-            }
+        updateEmptyView();
+
 //        mGridView.post(new Runnable() {
 //            @Override
 //            public void run() {
@@ -249,7 +246,33 @@ public class MainActivityFragment extends Fragment
 //                    mGridView.performItemClick(mGridView, 0, mGridView.getAdapter().getItemId(0));
 //                }
 //            }
-//        });
+//        })
+    }
+
+    private void updateEmptyView(){
+        if (mCursorAdapter.getCount() == 0) {
+            View viewParent = (View) getView().getParent();
+            AppCompatTextView tv = (AppCompatTextView) viewParent.findViewById(R.id.empty_movie_list);
+            if (tv != null) {
+                mGridView.setEmptyView(tv);
+                int message = R.string.empty_movie_list;
+                @MovieSyncAdapter.ServerStatus int serverStatus =
+                        Utility.getServerStatusFromPreferences(getActivity());
+                switch (serverStatus) {
+
+                    case MovieSyncAdapter.MOVIE_SERVER_DOWN:
+                        message = R.string.empty_movie_list_server_down;
+                        break;
+                    case MovieSyncAdapter.MOVIE_SERVER_INVALID:
+                        message = R.string.empty_movie_list_server_error;
+                        break;
+                    default:
+                        if (!Utility.isNetworkConnected(getActivity())) {
+                                message = R.string.empty_movie_list_due_to_network;
+                        }
+                }
+                tv.setText(message);
+            }
         }
     }
 
@@ -263,5 +286,10 @@ public class MainActivityFragment extends Fragment
         Log.i(LOG_TAG, "Settings key changed: " + key);
         mCurrentSortOrder = sharedPreferences.getString(key, "Popularity");
         Log.i(LOG_TAG, "Current Sort Order: " + mCurrentSortOrder);
+
+        if(key.equals(getString(R.string.pref_server_status_key))){
+            //update the view
+            updateEmptyView();
+        }
     }
 }

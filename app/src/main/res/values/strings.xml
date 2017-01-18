@@ -26,6 +26,7 @@
     <!-- Strings related to Notification preference -->
     <string name="pref_last_notification">last_notification
     </string>
+    <string name="pref_server_status_key">server_status</string>
     <string name="pref_enable_notifications_key" translatable="false">enable_notifications</string>
     <string name="pref_enable_notifications_label">Popular Movies Notifications</string>
     <string name="pref_enable_notifications_true">Enabled</string>
@@ -33,5 +34,9 @@
     <string name="pref_enable_notifications_default" translatable="false">true</string>
     <string name="empty_movie_list" translatable="false">There is no movie information available</string>
     <string name="empty_movie_list_due_to_network" translatable="false">
-        There is no movie information available as there is no network connections</string>
+        There is no movie information available as there is no network connection</string>
+    <string name="empty_movie_list_server_error" translatable="false">
+        There is no movie information available as the server is returning invalid data </string>
+    <string name="empty_movie_list_server_down" translatable="false">
+        There is no movie information available as the server is currently down</string>
 </resources>

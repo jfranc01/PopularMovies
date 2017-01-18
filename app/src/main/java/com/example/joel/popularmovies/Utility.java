@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.example.joel.popularmovies.data.PopularMoviesContract;
 import com.example.joel.popularmovies.model.Movie;
+import com.example.joel.popularmovies.sync.MovieSyncAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,5 +127,12 @@ public class Utility {
 
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    }
+
+    @SuppressWarnings("ResourceType")
+    static public @MovieSyncAdapter.ServerStatus int getServerStatusFromPreferences(Context context){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(context.getString(R.string.pref_server_status_key),
+                MovieSyncAdapter.MOVIE_UNKNOWN_ERROR);
     }
 }
