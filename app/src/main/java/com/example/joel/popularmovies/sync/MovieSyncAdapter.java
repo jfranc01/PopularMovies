@@ -212,6 +212,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             mContentResolver.delete(PopularMoviesContract.MovieEntry.CONTENT_URI,
                     null, null);
             int inserted = 0;
+            notifyNewMovies();
             // add to database
             if (cVVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
