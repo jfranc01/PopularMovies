@@ -3,6 +3,8 @@ package com.example.joel.popularmovies;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -110,5 +112,19 @@ public class Utility {
                 context.getString(R.string.sort_order_default));
 
         return category;
+    }
+
+    /**
+     * Method will check the network info status and return
+     * true or false
+     * @param context
+     * @return
+     */
+    public static Boolean isNetworkConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 }

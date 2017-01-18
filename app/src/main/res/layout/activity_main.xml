@@ -23,4 +23,13 @@
 
     <include layout="@layout/content_main" />
 
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/empty_movie_list"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="16dp">
+
+    </android.support.v7.widget.AppCompatTextView>
+
 </android.support.design.widget.CoordinatorLayout>

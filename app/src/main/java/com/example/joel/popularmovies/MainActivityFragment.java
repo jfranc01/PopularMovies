@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.example.joel.popularmovies.adapters.CursorAdaptor;
 import com.example.joel.popularmovies.adapters.MovieAdapter;
@@ -172,16 +174,15 @@ public class MainActivityFragment extends Fragment
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Cursor cursor = (Cursor)adapterView.getItemAtPosition(position);
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 Uri contentUri;
-                if(cursor != null){
+                if (cursor != null) {
                     //first find out what the current category is
                     String category = Utility.getCurrentCategory(getActivity());
-                    if(category.equals("Favourites")){
+                    if (category.equals("Favourites")) {
                         contentUri = PopularMoviesContract.FavouriteEntry
                                 .buildPopularMoviesUri(cursor.getLong(COL_FAV_MOVIE_ID));
-                    }
-                    else{
+                    } else {
                         contentUri = PopularMoviesContract.MovieEntry
                                 .buildPopularMoviesUri(cursor.getLong(COL_FAV_MOVIE_ID));
                     }
@@ -227,6 +228,20 @@ public class MainActivityFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
+        //get the count
+        if (data.getCount() == 0) {
+            View viewParent = (View) getView().getParent();
+            AppCompatTextView tv = (AppCompatTextView) viewParent.findViewById(R.id.empty_movie_list);
+            if (tv != null) {
+                mGridView.setEmptyView(tv);
+                int message = R.string.empty_movie_list;
+                if (!Utility.isNetworkConnected(getActivity())) {
+                    {
+                        message = R.string.empty_movie_list_due_to_network;
+                    }
+                }
+                tv.setText(message);
+            }
 //        mGridView.post(new Runnable() {
 //            @Override
 //            public void run() {
@@ -235,6 +250,7 @@ public class MainActivityFragment extends Fragment
 //                }
 //            }
 //        });
+        }
     }
 
     @Override
@@ -248,140 +264,4 @@ public class MainActivityFragment extends Fragment
         mCurrentSortOrder = sharedPreferences.getString(key, "Popularity");
         Log.i(LOG_TAG, "Current Sort Order: " + mCurrentSortOrder);
     }
-
-    /**
-     * This class will retrieve the list of movies
-     */
-//    public class FetchMovieList extends AsyncTask<String, String, List<Movie>> {
-//
-//        private final String LOG_TAG = FetchMovieList.class.getSimpleName();
-//
-//
-//        @Override
-//        protected List<Movie> doInBackground(String... params) {
-//
-//            String ADD_ON_SEGMENT = "";
-//            String jsonMovieString = null;
-//            HttpURLConnection httpURLConnection = null;
-//            InputStreamReader isr = null;
-//            BufferedReader br = null;
-//
-//            if (params[0].equalsIgnoreCase(getString(R.string.sort_order_choice_popularity_value))) {
-//                ADD_ON_SEGMENT = Constants.ADD_ON_POPULAR_SEGMENT;
-//            } else {
-//                ADD_ON_SEGMENT = Constants.ADD_ON_RATING_SEGMENT;
-//            }
-//            try {
-//
-//                Uri builtUri = Uri.parse(Constants.BASE_URL).buildUpon()
-//                        .appendEncodedPath(ADD_ON_SEGMENT)
-//                        .appendQueryParameter(Constants.API_KEY_PARAM,
-//                                BuildConfig.OPEN_MOVIE_DB_API_KEY)
-//                        .build();
-//
-//                Log.i(LOG_TAG, " Built URI: " + builtUri.toString());
-//
-//                //create the URL and open the connection
-//                URL url = new URL(builtUri.toString());
-//                httpURLConnection = (HttpURLConnection) url.openConnection();
-//                //set the request type
-//                httpURLConnection.setRequestMethod("GET");
-//                //call the connect method
-//                httpURLConnection.connect();
-//                //Create an InputStream reader;
-//                isr = new InputStreamReader(httpURLConnection.getInputStream());
-//
-//                if (isr == null) {
-//                    return null;
-//                }
-//
-//                //Create a string buffer
-//                StringBuffer buffer = new StringBuffer();
-//                //create a buffered reader
-//                br = new BufferedReader(isr);
-//                //variable to hold the content of the line being read
-//                String line;
-//                while ((line = br.readLine()) != null) {
-//                    buffer.append(line + "\n");
-//                }
-//
-//                if (buffer.length() == 0) {
-//                    return null;
-//                }
-//
-//                jsonMovieString = buffer.toString();
-//                Log.i(LOG_TAG, " Content: " + jsonMovieString);
-//
-//                //here we need to parse the json object to fetch the
-//                //data that we need
-//                return getMovieDataFromJsonString(jsonMovieString);
-//
-//            } catch (MalformedURLException e) {
-//                Log.e(LOG_TAG, " Error: " + e.getMessage());
-//            } catch (IOException e) {
-//                Log.e(LOG_TAG, " Error: " + e.getMessage());
-//            } finally {
-//                if (httpURLConnection != null) {
-//                    httpURLConnection.disconnect();
-//                }
-//
-//                if (br != null) {
-//                    try {
-//                        br.close();
-//                    } catch (IOException e) {
-//                        Log.e(LOG_TAG, " Cannot close stream reader: " + e.getMessage());
-//                    }
-//                }
-//            }
-//
-//            return null;
-//        }
-//
-//        /**
-//         * Method that wil parse the json object and return a list
-//         * of Movie objects
-//         *
-//         * @param jsonMovieString
-//         * @return ArrayList<Movie>
-//         */
-//        private List<Movie> getMovieDataFromJsonString(String jsonMovieString) {
-//
-//            final ArrayList<Movie> movieList = new ArrayList<>();
-//            Vector<ContentValues> cVVector;
-//            try {
-//                JSONObject jsonObj = new JSONObject(jsonMovieString);
-//                JSONArray jsonArray = jsonObj.getJSONArray("results");
-//                cVVector = new Vector<ContentValues>(jsonArray.length());
-//
-//                for (int i = 0; i < jsonArray.length(); i++) {
-//                    JSONObject movieObject = jsonArray.getJSONObject(i);
-//                    ContentValues moviewValues =
-//                            Utility.createMovieContentValuesFromJSON(movieObject);
-//                    cVVector.add(moviewValues);
-//                }
-//                int inserted = 0;
-//                // add to database
-//                if (cVVector.size() > 0) {
-//                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-//                    cVVector.toArray(cvArray);
-//                    inserted = getActivity().getContentResolver().
-//                            bulkInsert(PopularMoviesContract.MovieEntry.CONTENT_URI, cvArray);
-//                }
-//
-//                Log.d(LOG_TAG, "FetchMovieTask Complete. " + inserted + " Inserted");
-//                //return the list of movies
-//                return movieList;
-//            } catch (JSONException e) {
-//                Log.e(LOG_TAG, "Error creating JSON Object: " + e.getMessage());
-//            }
-//
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<Movie> movies) {
-//            super.onPostExecute(movies);
-//            getLoaderManager().restartLoader(MOVIES_LOADER, null, MainActivityFragment.this);
-//        }
-//    }
 }
