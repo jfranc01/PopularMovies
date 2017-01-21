@@ -283,9 +283,6 @@ public class MainActivityFragment extends Fragment
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.i(LOG_TAG, "Settings key changed: " + key);
-        mCurrentSortOrder = sharedPreferences.getString(key, "Popularity");
-        Log.i(LOG_TAG, "Current Sort Order: " + mCurrentSortOrder);
 
         if(key.equals(getString(R.string.pref_server_status_key))){
             //update the view
